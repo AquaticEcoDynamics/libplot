@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="13.0"
+	Name="libplot"
+	ProjectGUID="{9EC87BF9-45F7-4740-876E-E1FC5003CFA0}"
+	VCNestedProjectGUID="{C16EC5B0-C713-4564-A4D0-497EE322E68B}"
+	VCNestedProjectFileName="libplot.vcproj"
+	>
+	<Configurations/>
+	<Files/>
+</VisualStudioProject>
