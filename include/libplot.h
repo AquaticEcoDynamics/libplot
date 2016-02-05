@@ -33,7 +33,7 @@
 #define PF_TITLE  1
 #define PF_LABEL  2
 
-#ifdef _FORTRAN_VERSION_
+#ifdef _FORTRAN_SOURCE_
 # if SINGLE
 #   define AED_REAL real
 # else

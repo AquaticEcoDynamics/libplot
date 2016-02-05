@@ -41,8 +41,14 @@ else
 endif
 
 srcdir=src
-objdir=objs
 incdir=include
+ifeq ($(SINGLE),true)
+  objdir=obj_s
+  TARGET=lib/libplot_s.a
+else
+  objdir=obj
+  TARGET=lib/libplot.a
+endif
 
 SRCS=${srcdir}/${uibasic}.${srcext} \
      ${srcdir}/colours.c \
@@ -68,9 +74,9 @@ ifeq ($(SINGLE),true)
   CFLAGS += -DSINGLE=1
 endif
 
-all: libplot.a
+all: ${TARGET}
 
-libplot.a: ${objdir} ${OBJS}
+${TARGET}: ${objdir} ${OBJS} lib
 	ar rv $@ ${OBJS}
 	ranlib $@
 
@@ -82,8 +88,11 @@ clean: ${objdir}
 	@/bin/rm tstmap tstfont
 
 distclean: clean
-	@touch libplot.a
-	@/bin/rm libplot.a
+	@touch mod mod_s lib
+	@/bin/rm -rf lib mod mod_s
+
+lib:
+	@mkdir lib
 
 ${objdir}:
 	@mkdir ${objdir}
