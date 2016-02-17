@@ -152,7 +152,7 @@ void make_colour_map(gdImagePtr im, int style)
             _map[i].r = i;
             _map[i].g = LIM - abs(i-128);
             _map[i].b = LIM-i;
-	    _map[i].count = 0;
+            _map[i].count = 0;
             _map[i].col = gdImageColorAllocate(im, _map[i].r, _map[i].g, _map[i].b);
         }
     } else {
@@ -160,7 +160,7 @@ void make_colour_map(gdImagePtr im, int style)
             _map[i].r = LIM-i;
             _map[i].g = LIM - abs(i-128);
             _map[i].b = i;
-	    _map[i].count = 0;
+            _map[i].count = 0;
             _map[i].col = gdImageColorAllocate(im, _map[i].r, _map[i].g, _map[i].b);
         }
     }
