@@ -29,10 +29,11 @@
 #ifndef _PLOTTER_H_
 #define _PLOTTER_H_
 
-#define MAX_PLOTS  10
+#define MAX_PLOTS  16
 
 /* the C prototypes */
 int init_plotter(int *maxx, int *maxy);
+int init_plotter_max(int maxplots, int *maxx, int *maxy);
 int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
 void show_h_line(int plot, AED_REAL y);
 void set_plot_x_limits(int plot, double min, double max);

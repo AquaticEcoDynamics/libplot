@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.0.15"
+#define LIB_PLOT_VERSION "1.0.16"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -135,6 +135,7 @@
    void set_progname(const char *name);
 #  ifdef XPLOTS
    int init_plotter(int *maxx, int *maxy);
+   int init_plotter_max(int max_plots, int *maxx, int *maxy);
 #  endif
    void set_plot_font(int which, int size, const char *font);
    int create_plot(int posx, int posy, int maxx, int maxy, const char *title);

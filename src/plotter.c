@@ -84,7 +84,8 @@ typedef struct _plot_ {
     const char *version;
 } Plot;
 
-static Plot _plots[MAX_PLOTS];
+static int max_plots = MAX_PLOTS;
+static Plot *_plots = NULL;
 static int last_plot = -1;
 #ifdef XPLOTS
 static int okItm = -1;
@@ -163,6 +164,7 @@ int init_plotter(int *maxx, int *maxy)
 //  printf("Started  @ %s\n", buf);
 
 #ifdef XPLOTS
+    _plots = malloc(max_plots*sizeof(Plot));
     my_xdisp = 1;
     *maxx+=20; *maxy+=60;
     if ( InitUI(maxx, maxy) < 0 ) return -1;
@@ -176,6 +178,13 @@ int init_plotter(int *maxx, int *maxy)
     DisableControl(saveAllIn1Itm);
 #endif
     return 0;
+}
+int init_plotter_max(int _max_plots, int *maxx, int *maxy)
+{
+    if ( _max_plots > MAX_PLOTS )
+        max_plots = _max_plots + 2;
+
+    return init_plotter(maxx, maxy);
 }
 
 /******************************************************************************/
@@ -368,7 +377,7 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
 #endif
 
     last_plot++;
-    if ( last_plot >= MAX_PLOTS ) return -1;
+    if ( last_plot >= max_plots ) return -1;
 
     mx = maxx+80; my = maxy+60;
     im = gdImageCreate(mx, my);
