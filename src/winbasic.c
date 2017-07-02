@@ -548,7 +548,7 @@ void GetMouse(int *x, int *y)
 wchar_t * convstr (const char *src)
 {
     mbstate_t state;
-    int cnt = strlen(src);
+    size_t cnt = strlen(src);
     wchar_t *dest;
     size_t n=0;
 

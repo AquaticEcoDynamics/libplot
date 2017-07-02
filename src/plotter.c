@@ -125,7 +125,7 @@ static void calendar_date(int julian, int *yyyy, int *mm, int *dd);
 #ifdef _WIN32
 char *strndup(const char *s, int len)
 {
-    int l = strlen(s);
+    size_t l = strlen(s);
     char *t = malloc(min(l,len)+1);
     if ( t != NULL ) { strncpy(t,s,min(l,len)+1); t[min(l,len)] = 0; }
     return t;
@@ -669,7 +669,7 @@ void set_plot_version(int plot, const char *version)
 /*----------------------------------------------------------------------------*/
 void set_plot_varname(int plot, const char *varname)
 {
-    int w;
+    size_t w;
 
     w = strlen(varname) * (gdFontGetSmall()->w);
     gdImageString(_plots[plot].im, gdFontGetSmall(),
