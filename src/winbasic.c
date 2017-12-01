@@ -321,6 +321,12 @@ static WindowItem *_find_item_of_type(Window win, int type)
 int InitUI(int *width, int *height) {
     WNDCLASS WndClass;
     HINSTANCE hInstance = NULL;
+    DWORD swidth = GetSystemMetrics(SM_CXSCREEN);
+    DWORD sheight = GetSystemMetrics(SM_CYSCREEN);
+
+    /* adjust height/width so window will fit on the display */
+    if ( sheight - 40 < *height ) *height = sheight - 40;
+    if ( swidth < *width ) *width = swidth;
 
     WndClass.cbClsExtra = 0;
     WndClass.cbWndExtra = 0;
