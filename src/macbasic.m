@@ -155,7 +155,7 @@ static id my_window;
     menuItem = [[[NSMenuItem alloc] initWithTitle:@"Hide Others"
                                            action:@selector(hideOtherApplications:)
                                     keyEquivalent:@"h"] autorelease]; // Hide Others
-    [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+    [menuItem setKeyEquivalentModifierMask:(NSEventModifierFlagOption|NSEventModifierFlagCommand)];
     [appMenu addItem:menuItem];
 
     menuItem = [[[NSMenuItem alloc] initWithTitle:@"Show All"
@@ -189,7 +189,7 @@ static id my_window;
 - (int) addWindow:(int) x ypos:(int) y width:(int) w height:(int) h
 {
     window = [[NSWindow alloc] initWithContentRect:NSMakeRect(x, y, w, h)
-        styleMask:NSTitledWindowMask backing:NSBackingStoreBuffered defer:NO];
+        styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
 
     if ( !window ) {
         fprintf(stderr, "Failed to make window\n");
@@ -241,7 +241,7 @@ static id my_window;
 {
     NSEvent *event = NULL;
     do  {
-        event=[ NSApp nextEventMatchingMask:NSAnyEventMask
+        event=[ NSApp nextEventMatchingMask:NSEventMaskAny
                                   untilDate:[NSDate distantPast]
                                      inMode:NSDefaultRunLoopMode
                                     dequeue:YES ];
@@ -556,9 +556,9 @@ int Alert(const char *message, const char *but1, const char*but2)
     [alert setMessageText:[NSString stringWithUTF8String:message]];
 
 
-    if ( but2 != 0 ) [alert setAlertStyle:NSWarningAlertStyle];
-    else             [alert setAlertStyle:NSInformationalAlertStyle];
-                       // or .. NSCriticalAlertStyle
+    if ( but2 != 0 ) [alert setAlertStyle:NSAlertStyleWarning];
+    else             [alert setAlertStyle:NSAlertStyleInformational];
+                       // or .. NSAlertStyleCritical
 
     if ([alert runModal] == NSAlertFirstButtonReturn) {
         // OK clicked, delete the record

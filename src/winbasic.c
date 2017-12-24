@@ -321,8 +321,8 @@ static WindowItem *_find_item_of_type(Window win, int type)
 int InitUI(int *width, int *height) {
     WNDCLASS WndClass;
     HINSTANCE hInstance = NULL;
-    DWORD swidth = GetSystemMetrics(SM_CXSCREEN);
-    DWORD sheight = GetSystemMetrics(SM_CYSCREEN);
+    int swidth = GetSystemMetrics(SM_CXSCREEN);
+    int sheight = GetSystemMetrics(SM_CYSCREEN);
 
     /* adjust height/width so window will fit on the display */
     if ( sheight - 40 < *height ) *height = sheight - 40;
@@ -757,13 +757,13 @@ void FlushPicture(gdImagePtr im, int itm_id)
 /******************************************************************************/
 int NewEditTextItem(int left, int top, int width, int height, const char*text)
 {
-    return _add_item(EDT_ITEM, strdup(text), left, top, width, height);
+    return _add_item(EDT_ITEM, _strdup(text), left, top, width, height);
 }
 
 /******************************************************************************/
 int NewTextItem(int left, int top, int width, int height, const char*text)
 {
-    return _add_item(TXT_ITEM, strdup(text), left, top, width, height);
+    return _add_item(TXT_ITEM, _strdup(text), left, top, width, height);
 }
 
 /******************************************************************************
@@ -892,8 +892,8 @@ int Alert(const char *message, const char *but1, const char*but2)
 //          break;
     }
 
-    free(params.lpszText);
-    free(params.lpszCaption);
+    free((void*)params.lpszText);
+    free((void*)params.lpszCaption);
 
     return ret;
 }
