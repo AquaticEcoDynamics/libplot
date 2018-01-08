@@ -33,6 +33,15 @@
 #import <Cocoa/Cocoa.h>
 #include <ui_basic.h>
 
+#ifndef NSEventModifierFlagOption
+#define NSEventModifierFlagOption NSAlternateKeyMask
+#define NSEventModifierFlagCommand NSCommandKeyMask
+#define NSWindowStyleMaskTitled NSTitledWindowMask
+#define NSEventMaskAny NSAnyEventMask
+#define NSAlertStyleWarning NSWarningAlertStyle
+#define NSAlertStyleInformational NSInformationalAlertStyle
+#endif
+
 int Alert(const char *message, const char *but1, const char*but2);
 
 /******************************************************************************/
