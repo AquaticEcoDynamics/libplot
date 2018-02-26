@@ -38,7 +38,7 @@
 
 #include <colours.h>
 
-#ifdef _MS_WINDOWS_
+#ifdef _WIN32
  #define snprintf _snprintf
 #endif
 #include <ui_basic.h>
