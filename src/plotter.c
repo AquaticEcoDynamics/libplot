@@ -38,11 +38,9 @@
 #include <gdfontl.h>
 
 #include <colours.h>
-#ifdef XPLOTS
- #include <ui_basic.h>
- #ifdef _WIN32
+#include <ui_basic.h>
+#ifdef _WIN32
   #define snprintf _snprintf
- #endif
 #endif
 #define DEBUG_VALS 0
 #include <libplot.h>
@@ -61,10 +59,8 @@ void save_plot(int plot);
 /******************************************************************************/
 typedef struct _plot_ {
     int    plot_id;
-#ifdef XPLOTS
     int    item_id;
     int    save_id;
-#endif
     char  *title;
     gdImagePtr im;
     int    count;
@@ -87,12 +83,10 @@ typedef struct _plot_ {
 static int max_plots = MAX_PLOTS;
 static Plot *_plots = NULL;
 static int last_plot = -1;
-#ifdef XPLOTS
 static int okItm = -1;
 static int saveAllItm = -1;
 static int saveAllIn1Itm = -1;
 static int my_xdisp = 0;
-#endif
 static char *title_font = NULL;
 static int title_size = 40;
 static int tfu = 0, tfd = 0, lfu = 0, lfd = 0;
@@ -151,24 +145,31 @@ void set_progname(const char *name)
 { progname = strdup(name); }
 /*----------------------------------------------------------------------------*/
 
-static int _s_maxx = 0, _s_maxy = 0;
+static int _s_maxx = 0;
 /******************************************************************************/
 int init_plotter_(int *maxx, int *maxy) { return init_plotter(maxx, maxy); }
+/*----------------------------------------------------------------------------*/
+void init_plotter_no_gui()
+{
+/*
+    char buf[256];
+    time_t t = time(NULL);
+    ctime_r(&t, buf);
+    printf("Started  @ %s\n", buf);
+*/
+    _plots = malloc(max_plots*sizeof(Plot));
+}
 /*----------------------------------------------------------------------------*/
 int init_plotter(int *maxx, int *maxy)
 {
 #define pushButton        0
-    char buf[256];
-    time_t t = time(NULL);
-    ctime_r(&t, buf);
-//  printf("Started  @ %s\n", buf);
 
-#ifdef XPLOTS
-    _plots = malloc(max_plots*sizeof(Plot));
+    init_plotter_no_gui();
+
     my_xdisp = 1;
     *maxx+=20; *maxy+=60;
     if ( InitUI(maxx, maxy) < 0 ) return -1;
-    _s_maxx = *maxx; _s_maxy = *maxy;
+    _s_maxx = *maxx;
     *maxx-=20; *maxy-=60;
     okItm = NewControl(pushButton, "Done", *maxx - 90, *maxy + 20, 80, 20);
     DisableControl(okItm);
@@ -176,7 +177,7 @@ int init_plotter(int *maxx, int *maxy)
     DisableControl(saveAllItm);
     saveAllIn1Itm = NewControl(pushButton, "Save all-in-1", *maxx - 360, *maxy + 20, 110, 20);
     DisableControl(saveAllIn1Itm);
-#endif
+
     return 0;
 }
 int init_plotter_max(int _max_plots, int *maxx, int *maxy)
@@ -372,9 +373,7 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
 {
     gdImagePtr im;
     int mx, my;
-#ifdef XPLOTS
-    int        item_id, save_id;
-#endif
+    int item_id, save_id;
 
     last_plot++;
     if ( last_plot >= max_plots ) return -1;
@@ -387,7 +386,6 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
 
     drawText(im, 20, maxx+20, 2, 20, IS_TITLE|ALIGN_TOP|ALIGN_CENTER, (char*)title);
 
-#ifdef XPLOTS
     if ( my_xdisp ) {
         item_id = NewPicture(im, 0, posx, posy, mx, my);
         FlushPicture(im, item_id);
@@ -398,7 +396,7 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
         _plots[last_plot].item_id = item_id;
         _plots[last_plot].save_id = save_id;
     }
-#endif
+
     _plots[last_plot].plot_id = last_plot;
     _plots[last_plot].title = strdup(title);
     _plots[last_plot].im = im;
@@ -771,7 +769,6 @@ void plot_value(int plot, double x, double y, double z)
 }
 
 
-#ifdef XPLOTS
 /******************************************************************************/
 void flush_all_plots()
 {
@@ -793,13 +790,10 @@ void flush_plot(int plot)
 
     FlushPicture(_plots[plot].im, _plots[plot].item_id);
 }
-#endif
 
 
 /******************************************************************************/
-void save_all_plots_() { save_all_plots(); }
-/*----------------------------------------------------------------------------*/
-void save_all_plots()
+void save_all_plots_named(const char*name)
 {
     FILE *fout;
     gdImagePtr im;
@@ -834,16 +828,23 @@ void save_all_plots()
     }
 
     /* Write PNG */
-    fname = malloc(strlen(progname)+12);
-    strcpy(fname, progname);
-    strcat(fname, "_Plots.png");
+    if (name == NULL) {
+        fname = malloc(strlen(progname)+12);
+        strcpy(fname, progname);
+        strcat(fname, "_Plots.png");
+    } else
+        fname = (char*)name;
     fout = fopen(fname, "wb");
     gdImagePng(im, fout);
     fclose(fout);
-    free(fname);
+    if (name == NULL) free(fname);
 
     gdImageDestroy(im);
 }
+/*----------------------------------------------------------------------------*/
+void save_all_plots_() { save_all_plots_named(NULL); }
+/*----------------------------------------------------------------------------*/
+void save_all_plots() { save_all_plots_named(NULL); }
 
 
 /******************************************************************************/
@@ -873,14 +874,13 @@ void do_cleanup_(int *saveall) { do_cleanup(*saveall); }
 void do_cleanup(int saveall)
 {
     int i;
-#ifdef XPLOTS
     int hit;
-#endif
+/*
     char buf[256];
     time_t t = time(NULL);
     ctime_r(&t, buf);
     printf("Finished @ %s\n", buf);
-
+*/
     for (i = 0; i <= last_plot; i++) {
         if ( _plots[i].havez )
             printf("plot %d : zmin = %8.2le ; zmax = %8.2le (supplied %8.2le ; %8.2le) %s\n",
@@ -902,13 +902,12 @@ void do_cleanup(int saveall)
         for (i = 0; i <= last_plot; i++) {
             save_plot(i);
         }
-#ifdef XPLOTS
         if ( my_xdisp ) CleanupUI();
-#endif
         return;
     }
 
-#ifdef XPLOTS
+    if ( !my_xdisp ) return;
+
     EnableControl(okItm);
     EnableControl(saveAllItm);
     EnableControl(saveAllIn1Itm);
@@ -937,7 +936,6 @@ void do_cleanup(int saveall)
         }
     }
     CleanupUI();
-#endif
 }
 
 

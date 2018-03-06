@@ -1,3 +1,8 @@
+Version 1.0.19
+Fix segfault on save_all_in_one. Added :
+   void init_plotter_no_gui(void);
+   void save_all_plots_named(const char*name);
+
 Version 1.0.13
 Fix to menu on mac
 

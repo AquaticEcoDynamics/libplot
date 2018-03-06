@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.0.18"
+#define LIB_PLOT_VERSION "1.0.19"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -46,12 +46,10 @@
         CCHARACTER,INTENT(in) :: name(*)
         CINTEGER,INTENT(in)   :: len
      END SUBROUTINE
-#  ifdef XPLOTS
      INTEGER FUNCTION init_plotter(maxx, maxy) BIND(C, name="init_plotter_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(inout) :: maxx, maxy
      END FUNCTION
-#  endif
      SUBROUTINE set_plot_font(which, size, font, len) BIND(C, name='set_plot_font_')
         USE ISO_C_BINDING
         CINTEGER,INTENT(in)   :: which
@@ -111,12 +109,10 @@
         CINTEGER,INTENT(in) :: plot
         AED_REAL,INTENT(in) :: x, y, z
      END SUBROUTINE
-#  ifdef XPLOTS
      SUBROUTINE flush_plot(plot) BIND(C, name="flush_plot_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(in) :: plot
      END SUBROUTINE
-#  endif
      SUBROUTINE do_cleanup(saveall) BIND(C, name="do_cleanup_")
         USE ISO_C_BINDING
         CLOGICAL,INTENT(in) :: saveall
@@ -133,10 +129,9 @@
 
 
    void set_progname(const char *name);
-#  ifdef XPLOTS
+   void init_plotter_no_gui(void);
    int init_plotter(int *maxx, int *maxy);
    int init_plotter_max(int max_plots, int *maxx, int *maxy);
-#  endif
    void set_plot_font(int which, int size, const char *font);
    int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
    void show_h_line(int plot, AED_REAL y);
@@ -155,10 +150,9 @@
 #ifdef _WIN32
    char *ctime_r(const time_t *timep, char *buf);
 #endif
-#  ifdef XPLOTS
    void flush_plot(int plot);
    void flush_all_plots(void);
-#  endif
+   void save_all_plots_named(const char*name);
    void do_cleanup(int saveall);
 
 #endif
