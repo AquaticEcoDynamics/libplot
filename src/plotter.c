@@ -629,7 +629,7 @@ void set_plot_z_limits(int plot, double min, double max)
         snprintf(lab, 20, "%.2lf", _plots[plot].zmin);
     drawText(_plots[plot].im,
                     _plots[plot].maxx+45, _plots[plot].maxx+65,
-                     8, _plots[plot].maxy+52,
+                     8, MAX_COL_VAL-8,
                                 DRAW_UP|ALIGN_TOP|ALIGN_LEFT, (char*)lab);
 }
 
