@@ -4,12 +4,12 @@
  *                                                                            *
  * Developed by :                                                             *
  *     AquaticEcoDynamics (AED) Group                                         *
- *     School of Earth & Environment                                          *
+ *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2016 -  The University of Western Australia               *
+ * Copyright 2013 - 2018 -  The University of Western Australia               *
  *                                                                            *
- *  This file is part of libplot - a plotting library for GLM                 *
+ *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
  *  libplot is free software: you can redistribute it and/or modify           *
  *  it under the terms of the GNU General Public License as published by      *
