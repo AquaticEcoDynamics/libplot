@@ -58,9 +58,9 @@ char *strndup(const char *s, int len)
 }
 char *ctime_r(const time_t *timep, char *buf)
 {
-	char *s = ctime(timep);
-	strcpy(buf,s);
-	return buf;
+    char *s = ctime(timep);
+    strcpy(buf,s);
+    return buf;
 }
 #endif
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     char buf[256];
     gdImagePtr im;
     int i, h, maxx, maxy, mx;
-    int item_id, okItm;
+    int item_id, okItm, hit;
 
     maxx=420; maxy=360;
     InitUI(&maxx, &maxy);
@@ -105,7 +105,10 @@ int main(int argc, char *argv[])
 
     EnableControl(okItm);
 
-    while ( DoUI() != okItm ) ;
+    do  {
+        hit = DoUI();
+        fprintf(stderr, "hit = 0x%04X\n", hit);
+    } while ( hit != okItm && hit != -1 );
 
     gdImageDestroy(im);
 
