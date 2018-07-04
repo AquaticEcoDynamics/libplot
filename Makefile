@@ -58,10 +58,11 @@ OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
      ${objdir}/plotter.o
 
-CFLAGS=-O3 -Wno-format-truncation
+CFLAGS=-O3 #-Wno-format-truncation
 ifeq ($(WITH_XPLOTS),true)
   CFLAGS+=-DXPLOTS
 endif
+
 INCLUDES=-I${incdir} -I. -I/opt/local/include
 LIBS=-lgd -lpng -ljpeg -lm
 ifeq ($(OSTYPE),Darwin)

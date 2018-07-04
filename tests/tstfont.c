@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     EnableControl(okItm);
 
     do  {
-        hit = DoUI(); 
+        hit = DoUI();
         fprintf(stderr, "hit = 0x%04X\n", hit);
     } while ( hit != okItm && hit != -1 );
 
