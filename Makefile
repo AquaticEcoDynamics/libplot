@@ -58,7 +58,11 @@ OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
      ${objdir}/plotter.o
 
-CFLAGS=-O3 #-Wno-format-truncation
+CFLAGS=-O3
+ifneq ($(OSTYPE),Darwin)
+  CFLAGS+=-Wno-format-truncation
+endif
+
 ifeq ($(WITH_XPLOTS),true)
   CFLAGS+=-DXPLOTS
 endif
