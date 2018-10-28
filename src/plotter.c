@@ -175,7 +175,7 @@ int init_plotter(int *maxx, int *maxy)
     DisableControl(okItm);
     saveAllItm = NewControl(pushButton, "Save All", *maxx - 230, *maxy + 20, 80, 20);
     DisableControl(saveAllItm);
-    saveAllIn1Itm = NewControl(pushButton, "Save all-in-1", *maxx - 360, *maxy + 20, 110, 20);
+    saveAllIn1Itm = NewControl(pushButton, "Save All-in-1", *maxx - 360, *maxy + 20, 110, 20);
     DisableControl(saveAllIn1Itm);
 
     return 0;
@@ -500,7 +500,7 @@ void set_plot_x_limits(int plot, double min, double max)
                           _plots[plot].maxx+21, _plots[plot].maxy+21, black);
 
     if ( _plots[plot].xname != NULL ) xname = _plots[plot].xname;
-    else                              xname = "Time";
+    else                              xname = "Date";
     drawText(_plots[plot].im,
                     20, _plots[plot].maxx+20,
                     _plots[plot].maxy+22, _plots[plot].maxy+40,
@@ -546,7 +546,7 @@ void set_plot_y_limits(int plot, double min, double max)
                                  19, _plots[plot].maxy+21, black);
 
     if ( _plots[plot].yname != NULL ) yname = _plots[plot].yname;
-    else if ( _plots[plot].havez )    yname = "Depth";
+    else if ( _plots[plot].havez )    yname = "Height (m)";
     if ( yname != NULL )
         drawText(_plots[plot].im,
                      0, 17,
