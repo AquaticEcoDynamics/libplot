@@ -30,6 +30,9 @@
  *                                                                            *
  ******************************************************************************/
 
+// set minimum OS version to El Capitan
+#define __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ 101100
+
 #import <Cocoa/Cocoa.h>
 #include <ui_basic.h>
 
