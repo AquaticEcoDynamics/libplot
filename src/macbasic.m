@@ -33,7 +33,7 @@
 #import <Cocoa/Cocoa.h>
 #include <ui_basic.h>
 
-#if 0
+#if __clang_major__ == 7
 #ifndef NSEventModifierFlagOption
 #define NSEventModifierFlagOption NSAlternateKeyMask
 #define NSEventModifierFlagCommand NSCommandKeyMask
