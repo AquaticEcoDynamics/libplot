@@ -31,6 +31,7 @@
  ******************************************************************************/
 
 // set minimum OS version to El Capitan
+#undef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #define __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ 101100
 
 #import <Cocoa/Cocoa.h>
@@ -535,7 +536,7 @@ void FlushPicture(gdImagePtr im, int itm_id)
                                               size:NSZeroSize];
 
     [pic->ns_imgv setImage:pic->ns_img];
-    [pic->ns_imgv setNeedsDisplayInRect:NSMakeRect(pic->top, pic->left, pic->width, pic->height)];
+    [pic->ns_imgv setNeedsDisplayInRect:NSMakeRect(pic->left, pic->top, pic->width, pic->height)];
 }
 
 /******************************************************************************/
