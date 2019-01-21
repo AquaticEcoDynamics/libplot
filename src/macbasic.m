@@ -91,7 +91,7 @@ static int stopit = 0;
     id window;
 }
 - (id)init;
-- (void)runUIEvents;
+- (void)runUIEvents:(NSDate*) wait;
 - (void)cleanUp;
 - (void)addMenus;
 - (int)addWindow:(int) x ypos:(int) y width:(int) w height:(int) h;
@@ -125,7 +125,7 @@ static id my_window;
 /*----------------------------------------------------------------------------*/
 - (IBAction) endProgram:(id)sender
 {
-    NSLog(@"%@ %s", self, __func__);
+//  NSLog(@"%@ %s", self, __func__);
     stopit = -2;
 //  [NSApp terminate];
 }
@@ -252,19 +252,22 @@ static id my_window;
 }
 
 /*----------------------------------------------------------------------------*/
-- (void) runUIEvents
+- (void) runUIEvents:(NSDate*) wait
 {
     NSEvent *event = NULL;
-    do  {
+//  do  {
         event=[ NSApp nextEventMatchingMask:NSEventMaskAny
-                                  untilDate:[NSDate distantPast]
+                               // untilDate:[NSDate distantPast]
+                               // untilDate:[NSDate distantFuture]
+                               // untilDate:[NSDate dateWithTimeIntervalSinceNow: 0.0]
+                                  untilDate:wait
                                      inMode:NSDefaultRunLoopMode
                                     dequeue:YES ];
         if ( event != NULL ) {
             [NSApp sendEvent:event];
 //          stopit = (1 << 16);
         }
-    } while (event != NULL);
+//  } while (event != NULL);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -391,7 +394,7 @@ static int wHeight = 100;
 /******************************************************************************/
 int InitUI(int *width, int * height)
 {
-    fprintf(stderr, "InitUI\n");
+//  fprintf(stderr, "InitUI\n");
 
     CGDirectDisplayID display = CGMainDisplayID();
     size_t sheight = CGDisplayPixelsHigh(display);
@@ -424,8 +427,10 @@ int InitUI(int *width, int * height)
 static int doing_ui = 0;
 int CheckUI(void)
 {
-    [sharedController runUIEvents];
-    if ( !doing_ui ) {
+    if ( doing_ui ) {
+        [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow: 0.2]];
+    } else {
+        [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow: 0.0]];
         if ( stopit < 0 ) {
             if ( Alert("Are you sure you want to quit?", "OK", "Cancel") )
                 exit(1);

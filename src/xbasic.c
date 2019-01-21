@@ -546,8 +546,7 @@ static int _process_event(XEvent *ev)
 //  if ( _window != ev->xany.window )
 //      return 0;
 
-    switch (ev->type)
-        {
+    switch (ev->type) {
         case KeymapNotify:
             XRefreshKeyboardMapping(&ev->xmapping);
             break;
@@ -592,7 +591,7 @@ static int _process_event(XEvent *ev)
             printf("Unprocessed event %d\n", ev->type);
             break;
 */
-        }
+    }
     _set_window(twin);
     return ev->type;
 }
@@ -1517,8 +1516,7 @@ Menu *_new_menu(const char *title)
                     _add_item(WIN_MENU, mbar, 0, 0, win_width, MENU_BAR_HEIGHT);
         win_height += MENU_BAR_HEIGHT;
         XResizeWindow(display, _window, win_width, win_height);
-    }
-    else
+    } else
         mbar = item->data;
 
     mbar->menus = realloc(mbar->menus, sizeof(Menu)*(mbar->nMenus+1));

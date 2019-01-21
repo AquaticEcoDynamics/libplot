@@ -9,7 +9,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2018 -  The University of Western Australia               *
+ * Copyright 2013 - 2019 -  The University of Western Australia               *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -51,10 +51,6 @@
 #define PLOT_CLASS  L"Plot Window"
 
 /******************************************************************************/
-#define FONT_R  "9x15"
-#define FONT_B  "7x13bold"
-#define FONT_F  "fixed"
-
 #define CTL_ITEM    1
 #define PIC_ITEM    2
 #define TXT_ITEM    3
@@ -63,11 +59,6 @@
 #define MNU_ITEM    6
 
 /******************************************************************************/
-#define pushButton        0
-#define checkBox          1
-#define radioButton       2
-#define scrollBar        16
-
 #define inButton         10
 #define inCheckBox       11
 #define inUpButton       20
@@ -100,6 +91,7 @@ typedef struct _win_rec {
 } WindowRecord, *WindowPtr;
 
 /******************************************************************************/
+/*
 typedef int (*ProcPtr)(void*ctl);
 
 typedef struct _ctl_item {
@@ -117,11 +109,12 @@ typedef struct _ctl_item {
     ProcPtr           action;
     char             *title;
 } Control;
+*/
 
 /******************************************************************************/
 typedef struct _pic_item {
-    unsigned char    *img;
     BITMAPINFOHEADER  bmpi;
+    unsigned char    *img;
     int               true_colour;
     int               left;
     int               top;
@@ -152,7 +145,6 @@ typedef struct _bar_item {
     Menu *menus;
 } MenuBar;
 
-
 /******************************************************************************/
 static Window _new_window(int left, int top,
                                           int width, int height, int transient);
@@ -164,14 +156,11 @@ static void _set_window(Window win);
 static WindowPtr _find_window(Window win);
 
 static void _dialog_key(Window win, char key);
-static Control* _new_control(Window win,
+static int _new_control(Window win,
                          int left, int top, int width, int height,
                          const char *title, char visible,
                          long int value, long int min, long int max,
                          int procID, long int refCon);
-static int _point_in_ctl(Control * ctl, int h, int v);
-static void _hilite_control(Control * ctl, int state);
-static void _draw_control(Control * ctl);
 
 static void _draw_picture(PictureItem *pic);
 
@@ -180,13 +169,8 @@ static void _draw_window_items(void);
 static void _draw_mbar(MenuBar *mbar);
 static void _draw_menu(Menu *menu);
 
-typedef int Font;
-typedef int XArc;
-
 /******************************************************************************/
-static void _draw_string(int h, int v, Font font, const char *str);
-static void _make_arcs(XArc *arcs, int left, int top, int right, int bottom,
-                                                 int ovalWidth, int ovalHeight);
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 /******************************************************************************/
 extern char *progname;
@@ -194,16 +178,10 @@ static Window  _window = 0L;
 static WindowPtr    _win_lst = NULL;
 static HDC hdc;
 
-static Font font_b, font_r;
 static int cur_x, cur_y;
 
 static HWND hWnd = NULL;
 static HINSTANCE myInstance = NULL;
-
-/******************************************************************************/
-LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
-
-
 
 /******************************************************************************/
 HINSTANCE GetMyInstance(void)
@@ -255,7 +233,7 @@ static int _add_item(int type, void *data,
     if ( wptr->mbarItm != -1 ) {
         item->top += MENU_BAR_HEIGHT;
         item->bottom += MENU_BAR_HEIGHT;
-        if ( type == CTL_ITEM ) ((Control*)(data))->top += MENU_BAR_HEIGHT;
+//      if ( type == CTL_ITEM ) ((Control*)(data))->top += MENU_BAR_HEIGHT;
         if ( type == PIC_ITEM ) ((PictureItem*)(data))->top += MENU_BAR_HEIGHT;
     }
 
@@ -397,7 +375,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage,
 //          AppendMenu(hSubMenu, MF_STRING, APP_ABOUT, L"A&bout");
 //          AppendMenu(hSubMenu, MF_SEPARATOR, 0, L"-");
             AppendMenu(hSubMenu, MF_STRING, APP_EXIT, L"E&xit");
-            AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&File");
+            AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, L"&File");
 
             SetMenu(hWnd, hMenu);
             }
@@ -476,6 +454,7 @@ static int _check_event()
         switch (Message.message) {
             case WM_QUIT :
                 return -1;
+
             case WM_COMMAND :
                 // This will only happen if the message was reposted by the
                 // WinProc routine in which case we dont want to pass it on again
@@ -577,8 +556,9 @@ int NewControl(int type, const char*title,
                     WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
                     left, top, width, height,
                     _window, NULL,
-                    (HINSTANCE)GetWindowLong(_window, GWLP_HINSTANCE), NULL);
+                    (HINSTANCE)GetWindowLongPtr(_window, GWLP_HINSTANCE), NULL);
 
+    free((void*)lp);
     return _add_item(CTL_ITEM, hwndButton, left, top, width, height);
 }
 
@@ -591,6 +571,7 @@ void RenameControl(int itm_id, const char*title)
     if ( item->type != CTL_ITEM ) return;
     if ( item->data == NULL ) return;
     Button_SetText((HWND)item->data, lp);
+    free((void*)lp);
 }
 
 /******************************************************************************/
@@ -614,7 +595,6 @@ void EnableControl(int itm_id)
 
     Button_Enable((HWND)item->data, TRUE);
 }
-
 
 /******************************************************************************/
 static void _copy_img(gdImagePtr im, PictureItem *pic)
@@ -663,15 +643,15 @@ void _draw_picture(PictureItem *pic)
     FrameRect(hdc, &r, (HBRUSH)GetStockObject (BLACK_BRUSH));
 }
 
-
 /******************************************************************************/
-void _draw_string(int h, int v, Font font, const char *str)
+void _draw_string(int h, int v, const char *str)
 {
     RECT r;
     LPCTSTR lp = (LPCTSTR)convstr(str);
 
     r.top = v; r.bottom = v + 20; r.left = h, r.right = h + 100;
     DrawText(hdc,lp,-1,&r,DT_SINGLELINE | DT_VCENTER | DT_CENTER);
+    free((void*)lp);
 }
 
 /******************************************************************************/
@@ -690,8 +670,7 @@ static void _draw_window_items()
             case PIC_ITEM: _draw_picture(item->data); break;
             case TXT_ITEM:
             case EDT_ITEM:
-                _draw_string(item->left+6, item->top+15,
-                            (item->type == TXT_ITEM)?font_b:font_r, item->data);
+                _draw_string(item->left+6, item->top+15, item->data);
                 if ( item->type == EDT_ITEM ) {
                     r.top = item->top-1; r.left = item->left-1;
                     r.bottom = item->bottom;
@@ -778,12 +757,11 @@ static void _add_window(Window win )//, GC gc)
 
     if ( tr == NULL )
         _win_lst = wrec;
-    else
-        {
+    else {
         while ( tr->next )
             tr = tr->next;
         tr->next = wrec;
-        }
+    }
 
     wrec->win = win;
 //    wrec->gc = gc;
@@ -797,9 +775,8 @@ static void _set_window(Window win)
 {
     WindowPtr wptr = _find_window(win);
 
-    if ( wptr != NULL ) {
+    if ( wptr != NULL )
         _window  = wptr->win;
-    }
 }
 
 /******************************************************************************/
