@@ -33,6 +33,7 @@
  * Copyright 2003 - Ambinet System                                            *
  *                                                                            *
  ******************************************************************************/
+#undef UNICODE
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
@@ -47,8 +48,7 @@
 #define APP_ABOUT             0x100
 #define APP_EXIT              0x101
 
-
-#define PLOT_CLASS  L"Plot Window"
+#define PLOT_CLASS  "Plot Window"
 
 /******************************************************************************/
 #define CTL_ITEM    1
@@ -89,27 +89,6 @@ typedef struct _win_rec {
     int              curEdit;
     int              mbarItm;
 } WindowRecord, *WindowPtr;
-
-/******************************************************************************/
-/*
-typedef int (*ProcPtr)(void*ctl);
-
-typedef struct _ctl_item {
-    Window            owner;
-    int               left;
-    int               top;
-    int               width;
-    int               height;
-    char              visible;
-    unsigned char     hilite;
-    long int          value;
-    long int          min;
-    long int          max;
-    int               variant;
-    ProcPtr           action;
-    char             *title;
-} Control;
-*/
 
 /******************************************************************************/
 typedef struct _pic_item {
@@ -233,7 +212,6 @@ static int _add_item(int type, void *data,
     if ( wptr->mbarItm != -1 ) {
         item->top += MENU_BAR_HEIGHT;
         item->bottom += MENU_BAR_HEIGHT;
-//      if ( type == CTL_ITEM ) ((Control*)(data))->top += MENU_BAR_HEIGHT;
         if ( type == PIC_ITEM ) ((PictureItem*)(data))->top += MENU_BAR_HEIGHT;
     }
 
@@ -318,11 +296,11 @@ int InitUI(int *width, int *height) {
     WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 
     if (!RegisterClass(&WndClass)){
-        MessageBox(NULL, L"Registration of WinClass Failed!", L"Plot Window", MB_OK);
+        MessageBox(NULL, "Registration of WinClass Failed!", PLOT_CLASS, MB_OK);
         return 0;
     }
 
-    hWnd = CreateWindow(PLOT_CLASS, L"Plot Window",
+    hWnd = CreateWindow(PLOT_CLASS, PLOT_CLASS,
                   WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
                     10, 10, *width+10, *height+20+MENU_BAR_HEIGHT,
                         NULL, NULL, hInstance, NULL);
@@ -372,10 +350,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage,
             hMenu = CreateMenu();
 
             hSubMenu = CreatePopupMenu();
-//          AppendMenu(hSubMenu, MF_STRING, APP_ABOUT, L"A&bout");
-//          AppendMenu(hSubMenu, MF_SEPARATOR, 0, L"-");
-            AppendMenu(hSubMenu, MF_STRING, APP_EXIT, L"E&xit");
-            AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, L"&File");
+//          AppendMenu(hSubMenu, MF_STRING, APP_ABOUT, "A&bout");
+//          AppendMenu(hSubMenu, MF_SEPARATOR, 0, "-");
+            AppendMenu(hSubMenu, MF_STRING, APP_EXIT, "E&xit");
+            AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, "F&ile");
 
             SetMenu(hWnd, hMenu);
             }
@@ -528,23 +506,12 @@ void GetMouse(int *x, int *y)
     *x = cur_x; *y = cur_y;
 }
 
-#include <wchar.h>
 /******************************************************************************/
-wchar_t * convstr (const char *src)
+LPCTSTR convstr (const char *src)
 {
-    mbstate_t state;
-    size_t cnt = strlen(src);
-    wchar_t *dest;
-    size_t n=0;
+    char *dest = _strdup(src);
 
-    dest = malloc((cnt+1)*sizeof(wchar_t));
-
-    memset (&state, '\0', sizeof (state));
-    while (*src)
-        mbtowc(&dest[n++],src++,1);
-    dest[n] = L'\0';
-
-    return dest;
+    return (LPCTSTR)dest;
 }
 
 /******************************************************************************/
@@ -552,7 +519,7 @@ int NewControl(int type, const char*title,
                                       int left, int top, int width, int height)
 {
     LPCTSTR lp = (LPCTSTR)convstr(title);
-    HWND hwndButton = CreateWindow(L"BUTTON", lp,
+    HWND hwndButton = CreateWindow("BUTTON", lp,
                     WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
                     left, top, width, height,
                     _window, NULL,
@@ -666,7 +633,6 @@ static void _draw_window_items()
 
     while ( item != NULL ) {
         switch ( item->type ) {
-//          case CTL_ITEM: _draw_control(item->data); break;
             case PIC_ITEM: _draw_picture(item->data); break;
             case TXT_ITEM:
             case EDT_ITEM:
