@@ -257,9 +257,6 @@ static id my_window;
     NSEvent *event = NULL;
 //  do  {
         event=[ NSApp nextEventMatchingMask:NSEventMaskAny
-                               // untilDate:[NSDate distantPast]
-                               // untilDate:[NSDate distantFuture]
-                               // untilDate:[NSDate dateWithTimeIntervalSinceNow: 0.0]
                                   untilDate:wait
                                      inMode:NSDefaultRunLoopMode
                                     dequeue:YES ];
@@ -427,8 +424,11 @@ int InitUI(int *width, int * height)
 static int doing_ui = 0;
 int CheckUI(void)
 {
+    /* If we are just checking the ui we want to return as quickly as         *
+     * possible unless there is a quit requested.  If we are "doing_ui" then  *
+     * we have finished processing and can wait for user input indefinitely   */
     if ( doing_ui ) {
-        [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow: 0.2]];
+        [sharedController runUIEvents:[NSDate distantFuture]];
     } else {
         [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow: 0.0]];
         if ( stopit < 0 ) {
