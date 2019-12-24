@@ -1508,11 +1508,12 @@ void _add_menu_item(Menu *menu, const char *item, int enabled, char key)
 {
     static char keyStr[8] = " Ctrl+_";
     int sl = XTextWidth(XQueryFont(display, font_b), item, strlen(item)) + 20;
+    int slen = strlen(item);
 
     menu->items = realloc(menu->items, sizeof(char*)*(menu->nItems+1));
-    menu->items[menu->nItems] = malloc(strlen(item) + 1);
-    strncpy(menu->items[menu->nItems], item, strlen(item)+1);
-    (menu->items[menu->nItems])[strlen(item)] = 0;
+    menu->items[menu->nItems] = malloc(slen + 1);
+    strncpy(menu->items[menu->nItems], item, slen+1);
+    (menu->items[menu->nItems])[slen] = 0;
 
     menu->flags = realloc(menu->flags, sizeof(char)*(menu->nItems+1));
     menu->flags[menu->nItems] = (!enabled) ? 0x00 : 0x0F;
