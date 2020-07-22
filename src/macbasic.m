@@ -92,7 +92,7 @@ static int stopit = 0;
     id window;
 }
 - (id)init;
-- (void) applicationDidFinishLaunching:(NSNotification *)notification;
+- (void)applicationDidFinishLaunching:(NSNotification *)notification;
 - (void)runUIEvents:(NSDate*) wait;
 - (void)cleanUp;
 - (void)addMenus;
@@ -279,7 +279,9 @@ static id my_window;
 {
     id img = [[NSImage alloc] initWithCGImage:CGBitmapContextCreateImage(pic->context)
                                               size:NSZeroSize];
-    NSImageView *imgv = [[[NSImageView alloc] initWithFrame:NSMakeRect(pic->left-1, pic->top-1, pic->width+2, pic->height+2)] retain];
+    NSImageView *imgv = [[[NSImageView alloc]
+                               initWithFrame:NSMakeRect(pic->left-1, pic->top-1,
+                                    pic->width+2, pic->height+2)] retain];
     [imgv setImage:img];
     [imgv setImageFrameStyle:NSImageFramePhoto];
 
@@ -295,16 +297,12 @@ static id my_window;
 - (void) runUIEvents:(NSDate*) wait
 {
     NSEvent *event = NULL;
-//  do  {
-        event=[ NSApp nextEventMatchingMask:NSEventMaskAny
-                                  untilDate:wait
-                                     inMode:NSDefaultRunLoopMode
-                                    dequeue:YES ];
-        if ( event != NULL ) {
-            [NSApp sendEvent:event];
-//          stopit = (1 << 16);
-        }
-//  } while (event != NULL);
+    event=[NSApp nextEventMatchingMask:NSEventMaskAny
+                             untilDate:wait
+                                inMode:NSDefaultRunLoopMode
+                               dequeue:YES];
+    if ( event != NULL )
+        [NSApp sendEvent:event];
 }
 
 /*----------------------------------------------------------------------------*/
@@ -470,7 +468,7 @@ int CheckUI(void)
     if ( doing_ui ) {
         [sharedController runUIEvents:[NSDate distantFuture]];
     } else {
-        [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow: 0.0]];
+        [sharedController runUIEvents:[NSDate dateWithTimeIntervalSinceNow:0.0]];
         if ( stopit < 0 ) {
             if ( Alert("Are you sure you want to quit?", "OK", "Cancel") )
                 exit(1);

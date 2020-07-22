@@ -622,7 +622,7 @@ void set_plot_z_limits(int plot, double min, double max)
     _plots[plot].zscale = MAX_COL_VAL / (max - min);
     _plots[plot].havez = 1;
 #if DEBUG
-    fprintf(stderr, "plot %d zmin %8.2lf zmax %8.2lf zscale %8.2lf\n", plot+1,
+    fprintf(stderr, "plot %d zmin %8.2lf zmax %8.2lf zscale %8.2lf\n", plot,
                   _plots[plot].zmin, _plots[plot].zmax, _plots[plot].zscale);
 #endif
 
@@ -719,7 +719,7 @@ void plot_value(int plot, double x, double y, double z)
     if ( plot < 0 ) return;
 
 #if DEBUG
-//  if ( plot == 3 )
+    if ( plot == 0 )
     fprintf(stderr,"   plot_value(plot,(%d) x(%f), y(%f), z(%f))\n", plot, x, y, z);
 #endif
     xpos =                     ((x - _plots[plot].xmin) * _plots[plot].xscale) + 20;
@@ -774,8 +774,9 @@ void plot_value(int plot, double x, double y, double z)
                 /* should now never happen because of the bounds check above */
                 gdImageFilledRectangle(_plots[plot].im, xposp, ypos, xpos, _plots[plot].lasty, black);
                 fprintf(stderr, "plot %d z value out of bounds (%8.6f)\n", plot, z);
-            } else
+            } else {
                 gdImageFilledRectangle(_plots[plot].im, xposp, ypos, xpos, _plots[plot].lasty, _map[colour].col);
+            }
         } else {
             colour = black;
             if ( _plots[plot].count == 0 ) {

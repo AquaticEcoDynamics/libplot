@@ -139,12 +139,6 @@ static void _set_window(Window win);
 static WindowPtr _find_window(Window win);
 
 static void _dialog_key(Window win, char key);
-static int _new_control(Window win,
-                         int left, int top, int width, int height,
-                         const char *title, char visible,
-                         long int value, long int min, long int max,
-                         int procID, long int refCon);
-
 static void _draw_picture(PictureItem *pic);
 
 static void _draw_window_items(void);
