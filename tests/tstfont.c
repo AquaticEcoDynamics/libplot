@@ -45,7 +45,7 @@
 
 #define pushButton        0
 
-char *progname = NULL;
+extern char *progname;
 
 int tst_font(gdImagePtr im, const char*fl, double sz);
 
@@ -84,7 +84,7 @@ int gdStringWidth(const char *s, gdFontPtr f)
 }
 
 /******************************************************************************/
-int main(int argc, char *argv[])
+int _main_(int argc, char *argv[])
 {
     gdImagePtr im;
     int maxx, maxy;

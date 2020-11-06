@@ -45,7 +45,7 @@
 
 #define pushButton        0
 
-char *progname = NULL;
+extern char *progname;
 
 /******************************************************************************/
 #ifdef _WIN32
@@ -72,7 +72,7 @@ int gdStringWidth(const char *s, gdFontPtr f)
 }
 
 /******************************************************************************/
-int main(int argc, char *argv[])
+int _main_(int argc, char *argv[])
 {
     char buf[256];
     gdImagePtr im;
