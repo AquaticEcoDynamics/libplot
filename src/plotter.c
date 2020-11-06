@@ -41,6 +41,7 @@
 #include <ui_basic.h>
 #ifdef _WIN32
   #define snprintf _snprintf
+  #define strdup   _strdup
 #endif
 #define DEBUG_VALS 0
 #include <libplot.h>
@@ -65,6 +66,7 @@ typedef struct _plot_ {
     gdImagePtr im;
     int    count;
     int    maxx, maxy, lasty;
+    int   *lastys;
     int    xstep, xposp;
     int    ystep, yposp;
     int    zstep, zposp;
@@ -186,6 +188,7 @@ void init_plotter_no_gui()
     printf("Started  @ %s\n", buf);
 */
     _plots = malloc(max_plots*sizeof(Plot));
+    memset(_plots, 0, max_plots*sizeof(Plot));
 }
 /*----------------------------------------------------------------------------*/
 int init_plotter(int *maxx, int *maxy)
@@ -442,6 +445,7 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
     _plots[last_plot].zname = NULL;
     _plots[last_plot].zinit = 0;
     _plots[last_plot].version = NULL;
+    _plots[last_plot].lastys = NULL;
 
     return last_plot;
 }
@@ -468,6 +472,18 @@ void set_plot_y_label(int plot, const char *label)
     if ( plot < 0 ) return;
     _plots[plot].havey = 1;
     _plots[plot].yname = strdup(label);
+}
+
+
+/*----------------------------------------------------------------------------*/
+int add_plot_subplot_y(int plot)
+{
+    if ( plot < 0 ) return -1;
+    if ( _plots[last_plot].lastys != NULL )
+        _plots[plot].havey++;
+    _plots[last_plot].lastys = realloc(_plots[last_plot].lastys,
+                                         sizeof(int)*_plots[plot].havey);
+    return _plots[plot].havey;
 }
 
 
@@ -529,7 +545,7 @@ void set_plot_x_limits(int plot, double min, double max)
 
     if ( _plots[plot].xname != NULL ) xname = _plots[plot].xname;
     else                              xname = "Date";
-    drawText(_plots[plot].im,
+        drawText(_plots[plot].im,
                     20, _plots[plot].maxx+20,
                     _plots[plot].maxy+22, _plots[plot].maxy+40,
                                          ALIGN_TOP|ALIGN_CENTER, (char*)xname);
@@ -715,6 +731,7 @@ void plot_value_(int *plot, AED_REAL *x, AED_REAL *y, AED_REAL *z)
 void plot_value(int plot, double x, double y, double z)
 {
     int colour=0, xpos, xposp, ypos;
+    int subplot = 0;
 
     if ( plot < 0 ) return;
 
@@ -747,7 +764,11 @@ void plot_value(int plot, double x, double y, double z)
     fprintf(stderr, "    xposp = %d xpos = %d ypos = %d xscale = %f count %d\n", xposp, xpos, ypos, _plots[plot].xscale, _plots[plot].count);
 #endif
 
-    if ( !_plots[plot].havez ) z = y;
+    if ( !_plots[plot].havez ) {
+        subplot = trunc(z) - 1;
+        colour = z * (256 / _plots[plot].havey);
+        z = y;
+    }
     if ( _plots[plot].zinit ) {
         if (_plots[plot].zzmin > z) _plots[plot].zzmin = z;
         if (_plots[plot].zzmax < z) _plots[plot].zzmax = z;
@@ -778,16 +799,24 @@ void plot_value(int plot, double x, double y, double z)
                 gdImageFilledRectangle(_plots[plot].im, xposp, ypos, xpos, _plots[plot].lasty, _map[colour].col);
             }
         } else {
-            colour = black;
-            if ( _plots[plot].count == 0 ) {
-                _plots[plot].lastx = x;
-                _plots[plot].lasty = ypos;
-            } else
-                gdImageLine(_plots[plot].im, xposp, _plots[plot].lasty, xpos, ypos, black);
+            if ( _plots[plot].havey > 1 ) {
+                if ( _plots[plot].count > 0 )
+                    gdImageLine(_plots[plot].im, xposp, _plots[plot].lastys[subplot], xpos, ypos, colour);
+                _plots[plot].lastys[subplot] = ypos;
+                if ( subplot >= (_plots[plot].havey-1) ) _plots[plot].count++;
+            } else {
+                colour = black;
+                if ( _plots[plot].count == 0 ) {
+                    _plots[plot].lastx = x;
+                    _plots[plot].lasty = ypos;
+                } else
+                    gdImageLine(_plots[plot].im, xposp, _plots[plot].lasty, xpos, ypos, black);
+                _plots[plot].count++;
+            }
         }
     }
 
-    _plots[plot].count++;
+    if ( _plots[plot].havez ) _plots[plot].count++;
     _plots[plot].lastx = x;
     _plots[plot].lasty = ypos;
 

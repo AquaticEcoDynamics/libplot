@@ -82,6 +82,8 @@ typedef struct _win_item {
 
 
 static int stopit = 0;
+int dwidth = 1920;
+int dheight = 1080;
 
 /******************************************************************************/
 
@@ -93,7 +95,7 @@ static int stopit = 0;
 }
 - (id)init;
 - (void)applicationDidFinishLaunching:(NSNotification *)notification;
-- (void)runUIEvents:(NSDate*) wait;
+- (BOOL)runUIEvents:(NSDate*) wait;
 - (void)cleanUp;
 - (void)addMenus;
 - (int)addWindow:(int) x ypos:(int) y width:(int) w height:(int) h;
@@ -108,6 +110,8 @@ static int stopit = 0;
 /******************************************************************************/
 static Controller *sharedController;
 static id my_window;
+static int __arg_c = 0;
+static char **__arg_v = NULL;
 
 /*============================================================================*/
 @implementation Controller
@@ -294,15 +298,18 @@ static id my_window;
 }
 
 /*----------------------------------------------------------------------------*/
-- (void) runUIEvents:(NSDate*) wait
+- (BOOL) runUIEvents:(NSDate*) wait
 {
     NSEvent *event = NULL;
     event=[NSApp nextEventMatchingMask:NSEventMaskAny
                              untilDate:wait
                                 inMode:NSDefaultRunLoopMode
                                dequeue:YES];
-    if ( event != NULL )
+    if ( event != NULL ) {
         [NSApp sendEvent:event];
+        return YES;
+    }
+    return NO;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -316,6 +323,35 @@ static id my_window;
 - (void) cleanUp
 {
     [window release];
+}
+
+/*----------------------------------------------------------------------------*/
+-(BOOL) application: (NSApplication*)sharedApplication openFile:(NSString*) fileName
+{
+    __arg_c = 1;
+    __arg_v = malloc(1 * sizeof(char*));
+    __arg_v[0] = strdup([fileName UTF8String]);
+
+//  NSLog(@"openFile=%@", fileName);
+//  fprintf(stderr, "openFile \"%s\"\n", [fileName UTF8String]);
+    return YES;
+}
+
+/*----------------------------------------------------------------------------*/
+-(void) application: (NSApplication*)sharedApplication openFiles:(NSArray<NSString *> *)filenames
+{
+    int i = 0;
+
+    __arg_c = [filenames count];
+    __arg_v = malloc(__arg_c * sizeof(char*));
+    __arg_v[0] = NULL;
+
+//  fprintf(stderr, "openFiles with %d entries\n", [filenames count]);
+    for ( NSString* str in filenames ) {
+//      NSLog( @"%@", str );
+//      fprintf(stderr, "openFiles : name \"%s\"\n", [str UTF8String]);
+        __arg_v[i++] = strdup([str UTF8String]);
+    }
 }
 
 @end
@@ -431,6 +467,7 @@ int InitUI(int *width, int * height)
 {
 //  fprintf(stderr, "InitUI\n");
 
+#if 0
     CGDirectDisplayID display = CGMainDisplayID();
     size_t sheight = CGDisplayPixelsHigh(display);
     size_t swidth  = CGDisplayPixelsWide(display);
@@ -439,11 +476,6 @@ int InitUI(int *width, int * height)
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    /* adjust height/width so window will fit on the display */
-    if ( sheight - 40 < *height ) *height = sheight - 40;
-    if ( swidth < *width ) *width = swidth;
-    wHeight = *height;
-
     // create our gui "Controller" instance
     if (!(controller = [[Controller alloc] init]))
         return -1;
@@ -451,9 +483,17 @@ int InitUI(int *width, int * height)
 
     [controller retain];
     [controller addMenus];
-    [controller addWindow:0 ypos:0 width:(*width) height:(*height)];
 
     [NSApp finishLaunching];
+#endif
+
+    /* adjust height/width so window will fit on the display */
+    if ( dheight - 40 < *height ) *height = dheight - 40;
+    if ( dwidth < *width ) *width = dwidth;
+    wHeight = *height;
+
+    [sharedController addWindow:0 ypos:0 width:(*width) height:(*height)];
+
     return 0;
 }
 
@@ -625,4 +665,154 @@ int Alert(const char *message, const char *but1, const char*but2)
     }
     [alert release];
     return ret;
+}
+
+/******************************************************************************/
+#undef main
+
+#include <libgen.h>
+#include <sys/stat.h>
+
+int _main_(int argc, const char *argv[]);
+
+/*----------------------------------------------------------------------------*/
+void capitalise(char *s)
+{
+    int tog = 1;
+    while (*s) {
+        if ( tog ) *s = toupper(*s);
+        else       *s = tolower(*s);
+        tog = (*s == ' ' || *s == '_' );
+        s++;
+    }
+}
+
+/******************************************************************************/
+static const char** add_arg(int *argc, const char**xargv, const char *argv)
+{
+    int c = *argc;
+    c++; xargv = realloc(xargv, sizeof(char*)*c);
+    xargv[c-1] = strdup(argv);
+    *argc = c;
+    return xargv;
+}
+
+
+#define TLOG_NAME "/tmp/STD_LOG.txt"
+/******************************************************************************/
+FILE *reopen_log(FILE *l)
+{
+    char nbuf[128];
+    char *tbuf = NULL;
+    struct stat buf;
+
+    snprintf(nbuf, 120, "%s-Log.txt", progname);
+
+    if ( l != NULL ) {
+        fclose(l);
+        if ( (l = fopen(TLOG_NAME, "r")) != NULL ) {
+            fstat(fileno(l), &buf);
+            tbuf = malloc(buf.st_size+10);
+            fread(tbuf, 1, buf.st_size, l);
+            fclose(l);
+        }
+        remove(TLOG_NAME);
+    }
+
+    if ( (l = fopen(nbuf, "w")) != NULL ) {
+        setvbuf(l, NULL, _IONBF, 0);
+
+        if ( tbuf != NULL ) {
+            fwrite(tbuf, 1, buf.st_size, l);
+            free(tbuf);
+        }
+    }
+
+    if ( !isatty(fileno(stderr)) ) {
+        dup2(fileno(l), fileno(stderr));
+        setvbuf(stderr, NULL, _IONBF, 0);
+    }
+    if ( !isatty(fileno(stdout)) ) {
+        dup2(fileno(l), fileno(stdout));
+        setvbuf(stdout, NULL, _IONBF, 0);
+    }
+
+    return l;
+}
+
+/******************************************************************************/
+int main(int argc, const char *argv[])
+{
+    Controller *controller;
+
+    int i, xargc = 0;
+    const char **xargv = NULL;
+    FILE *l = fopen(TLOG_NAME, "w");
+    setvbuf(l, NULL, _IONBF, 0);
+
+    [NSApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    if (!(controller = [[Controller alloc] init]))
+        return -1;
+
+    [NSApp setDelegate: (id)controller];   // tell NSApp to use this one
+    [controller retain];
+    [controller addMenus];
+    // Tell it to finish launching
+    [NSApp finishLaunching];
+
+    // deal with any events generated by the above (this will include
+    // triggering the applicationDidFinishLaunching
+    while ([controller runUIEvents:[NSDate dateWithTimeIntervalSinceNow:0.0]]) ;
+
+    /*------------------------------------------------------------------------*/
+    // extract and capitalise the program name
+    progname = strdup(basename((char*)argv[0]));
+    capitalise(progname);
+
+//  fprintf(l, "progname = \"%s\"\n", progname);
+
+//  fprintf(l, "CMD[%d] = \"%s\"\n", 0, argv[0]);
+    xargv = add_arg(&xargc, xargv, progname);
+    for (i = 1; i < argc; i++) {
+//      fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
+        xargv = add_arg(&xargc, xargv, argv[i]);
+    }
+
+    if ( __arg_v != NULL ) {
+        char *targ = NULL;
+        char *d = NULL, *f, *td;
+
+        // these should all be files with full pathnames
+        for (i = 0; i < __arg_c; i++) {
+            targ = __arg_v[i];
+//          fprintf(l, "__CMD[%d] = \"%s\"\n", i, targ);
+            td = dirname(targ);
+            f = basename(targ);
+            if ( d == NULL ) {
+                if ( chdir(td) != 0 ) { }
+                d = td;
+            } else {
+                free(td);
+            }
+            xargv = add_arg(&xargc, xargv, f);
+            free(targ); free(f);
+        }
+        free(__arg_v); __arg_v = NULL; __arg_c = 0;
+        if ( d != NULL ) free(d);
+    }
+    for (i = 0; i < xargc; i++) {
+        fprintf(l, "X_CMD[%d] = \"%s\"\n", i, xargv[i]);
+    }
+
+    l = reopen_log(l);
+
+    /*------------------------------------------------------------------------*/
+
+    CGDirectDisplayID display = CGMainDisplayID();
+    dheight = CGDisplayPixelsHigh(display);
+    dwidth  = CGDisplayPixelsWide(display);
+
+    return _main_(xargc, xargv);
 }

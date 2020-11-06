@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.0.23"
+#define LIB_PLOT_VERSION "1.1.0"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -136,6 +136,7 @@
    int init_plotter_max(int max_plots, int *maxx, int *maxy);
    void set_plot_font(int which, int size, const char *font);
    int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
+   int add_plot_subplot_y(int plot);
    void show_h_line(int plot, AED_REAL y);
    void set_plot_x_label(int plot, const char *label);
    void set_plot_y_label(int plot, const char *label);

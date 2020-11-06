@@ -108,9 +108,9 @@ ${objdir}/%.o: ${srcdir}/%.c ${incdir}/%.h
 ${objdir}/${uibasic}.o: ${srcdir}/${uibasic}.${srcext}
 	$(CC) -Wall -fPIC $(CFLAGS) $(INCLUDES) -g -c $< -o $@
 
-tstmap: tests/tstmap.c ${srcdir}/${uibasic}.${srcext} ${srcdir}/colours.c
-	$(CC) -DTRUE_COLOUR=1 $(CFLAGS) $(INCLUDES) tests/tstmap.c ${srcdir}/${uibasic}.${srcext} ${srcdir}/colours.c $(LIBS) -o $@
+tstmap: tests/tstmap.c ${TARGET}
+	$(CC) -DTRUE_COLOUR=1 $(CFLAGS) $(INCLUDES) tests/tstmap.c ${TARGET} $(LIBS) -o $@
 
-tstfont: tests/tstfont.c ${srcdir}/xbasic.c ${srcdir}/colours.c
-	$(CC) -DTRUE_COLOUR=1 $(CFLAGS) $(INCLUDES) tests/tstfont.c ${srcdir}/${uibasic}.${srcext} ${srcdir}/colours.c $(LIBS) -o $@
+tstfont: tests/tstfont.c ${TARGET}
+	$(CC) -DTRUE_COLOUR=1 $(CFLAGS) $(INCLUDES) tests/tstfont.c ${TARGET} $(LIBS) -o $@
 

@@ -40,6 +40,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <io.h>
 
 #include <ui_basic.h>
 
@@ -131,7 +133,7 @@ typedef struct _bar_item {
 static Window _new_window(int left, int top,
                                           int width, int height, int transient);
 static int Alert(const char *message, const char *but1, const char*but2);
-static int About(const char *message);
+static void About(const char *message);
 static int _check_event(void);
 
 static void _add_window(Window win);
@@ -157,7 +159,9 @@ static WindowPtr    _win_lst = NULL;
 static HDC hdc;
 
 static int cur_x, cur_y;
+static int dwidth = 1920, dheight = 1080;
 
+static WNDCLASS WndClass;
 static HWND hWnd = NULL;
 static HINSTANCE myInstance = NULL;
 
@@ -274,33 +278,11 @@ static WindowItem *_find_item_of_type(Window win, int type)
  *                                                                            *
  ******************************************************************************/
 int InitUI(int *width, int *height) {
-    WNDCLASS WndClass;
     HINSTANCE hInstance = NULL;
-    int swidth = GetSystemMetrics(SM_CXSCREEN);
-    int sheight = GetSystemMetrics(SM_CYSCREEN);
 
     /* adjust height/width so window will fit on the display */
-    if ( sheight - 40 < *height ) *height = sheight - 40;
-    if ( swidth < *width ) *width = swidth;
-
-    WndClass.cbClsExtra = 0;
-    WndClass.cbWndExtra = 0;
-    WndClass.hbrBackground = (HBRUSH)GetStockObject (WHITE_BRUSH);
-    WndClass.hCursor = LoadCursor (NULL, IDC_ARROW);
-    WndClass.hIcon = LoadIcon (NULL, MAKEINTRESOURCE( APP_ICON ));
-    WndClass.hInstance = hInstance;
-    WndClass.lpfnWndProc = (WNDPROC) WndProc;
-    if (progname != NULL)
-        WndClass.lpszClassName = progname;
-    else
-        WndClass.lpszClassName = PLOT_CLASS;
-    WndClass.lpszMenuName = NULL;
-    WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-
-    if (!RegisterClass(&WndClass)){
-        MessageBox(NULL, "Registration of WinClass Failed!", WndClass.lpszClassName, MB_OK);
-        return 0;
-    }
+    if ( dheight - 40 < *height ) *height = dheight - 40;
+    if ( dwidth < *width ) *width = dwidth;
 
     hWnd = CreateWindow(WndClass.lpszClassName, WndClass.lpszClassName,
                   WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
@@ -362,9 +344,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage,
             AppendMenu(hSubMenu, MF_SEPARATOR, 0, "-");
             AppendMenu(hSubMenu, MF_STRING, APP_EXIT, "Q&uit");
             if (short_progname != NULL)
-                mnuTitle = strdup(short_progname);
+                mnuTitle = _strdup(short_progname);
             else
-                mnuTitle = strdup(progname);
+                mnuTitle = _strdup(progname);
             mnuTitle[0] = toupper(mnuTitle[0]);
 
             AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, mnuTitle);
@@ -858,7 +840,7 @@ static int Alert(const char *message, const char *but1, const char*but2)
 }
 
 /******************************************************************************/
-static int About(const char *message)
+static void About(const char *message)
 {
     HINSTANCE hInstance = NULL;
     MSGBOXPARAMS params;
@@ -879,4 +861,260 @@ static int About(const char *message)
 
     free((void*)params.lpszText);
     free((void*)params.lpszCaption);
+}
+
+
+/******************************************************************************/
+
+/******************************************************************************/
+char *dirname_r(const char *s, char *buf)
+{
+    char *t;
+    strncpy(buf, s, 4090);
+    t = strrchr(buf, '\\');
+    if ( t != NULL ) {
+        *t = 0; return buf;
+    }
+    t = strrchr(buf, '/');
+    if ( t != NULL ) {
+        *t = 0; return buf;
+    }
+    *buf = 0;
+    return (char*)buf;
+}
+
+/*----------------------------------------------------------------------------*/
+static char *__dirname_buf = NULL;
+char *dirname(const char *s)
+{
+    if ( __dirname_buf == NULL ) __dirname_buf = malloc(4096);
+    return dirname_r(s, __dirname_buf);
+}
+
+/******************************************************************************/
+char *basename_r(const char *s, char *buf)
+{
+    char *t;
+    strncpy(buf, s, 4090);
+    t = strrchr(buf, '.');
+    if (t != NULL) {
+        // strip the .exe part (if it has one)
+        if (_stricmp(t, ".exe") == 0)
+            *t = 0;
+    }
+    t = strrchr(buf, '\\');
+    if ( t != NULL ) return ++t;
+    t = strrchr(buf, '/');
+    if ( t != NULL ) return ++t;
+    return (char*)buf;
+}
+
+/*----------------------------------------------------------------------------*/
+static char *__basename_buf = NULL;
+char *basename(const char *s)
+{
+    if ( __basename_buf == NULL ) __basename_buf = malloc(4096);
+    return basename_r(s, __basename_buf);
+}
+
+/*----------------------------------------------------------------------------*/
+static char *get_process_name()
+{
+    TCHAR szFileName[MAX_PATH];
+
+    GetModuleFileName(NULL, szFileName, MAX_PATH);
+    return _strdup(szFileName);
+}
+
+/******************************************************************************/
+char ** break_command_line(int *argc, char *processname, char *lpCmdLine)
+{
+    char **args;
+    char *s = lpCmdLine, *t;
+    int  nargs = 1, tog = 0, l;
+
+    char *targ = NULL;
+    char *d = NULL, *f, *td;
+
+    targ = malloc(sizeof(char)*(strlen(s)+1));
+    args = malloc(sizeof(char*) * 2);
+    args[0] = processname;
+    args[1] = NULL;
+
+    while (s != NULL) {
+        while ( *s == ' ' || *s == '\t' ) s++;
+        if (*s == '"' || *s == '\'' ) {
+            tog = *s++;
+        }
+        if (*s == 0) break;
+        nargs++;
+        args = realloc(args, sizeof(char*)*(nargs+1));
+        args[nargs] = NULL;
+        t = s;
+        if ( tog ) {
+            while ( *s != 0 && *s != tog ) s++;
+            tog = 0; s++;
+            l = s - t - 1;
+        } else {
+            while ( *s != 0 && *s != ' ' && *s != '\t') s++;
+            l = s - t;
+        }
+
+        memcpy(targ, t, l);
+        targ[l] = 0;
+
+        td = dirname(targ);
+        f = basename(targ);
+        if ( d == NULL ) {
+//          if ( chdir(td) != 0 ) { }
+            if ( SetCurrentDirectory(td) != 0 ) { }
+            d = td;
+        }
+        args[nargs-1] = _strdup(f);
+
+        if (*s == 0) break;
+    }
+
+    free(targ);
+    *argc = nargs;
+    return args;
+}
+
+/*----------------------------------------------------------------------------*/
+void capitalise(char *s)
+{
+    int tog = 1;
+    while (*s) {
+        if ( tog ) *s = toupper(*s);
+        else       *s = tolower(*s);
+        tog = (*s == ' ' || *s == '_' );
+        s++;
+    }
+}
+
+
+int _main_(int argc, const char *argv[]);
+
+static char TLOG_NAME[1024];
+
+/******************************************************************************/
+FILE *reopen_log(FILE *l)
+{
+    char nbuf[128];
+    char *tbuf = NULL;
+    HANDLE hFile = NULL;
+    struct stat buf;
+
+    snprintf(nbuf, 120, "%s-Log.txt", progname);
+
+    if (l != NULL) {
+        fclose(l);
+        if ((l = fopen(TLOG_NAME, "r")) != NULL) {
+            fstat(_fileno(l), &buf);
+            tbuf = malloc(buf.st_size + 10);
+            fread(tbuf, 1, buf.st_size, l);
+            fclose(l);
+        }
+        remove(TLOG_NAME);
+    }
+
+    if ((l = fopen(nbuf, "w")) != NULL) {
+        setvbuf(l, NULL, _IONBF, 0);
+
+        if (tbuf != NULL) {
+            fwrite(tbuf, 1, buf.st_size, l);
+            free(tbuf);
+        }
+    }
+
+    if (freopen(TLOG_NAME, "w", stdout) != NULL) {
+        _dup2(_fileno(l), _fileno(stdout));
+        setvbuf(stdout, NULL, _IONBF, 0);
+    }
+    if (freopen(TLOG_NAME, "w", stderr) != NULL) {
+        _dup2(_fileno(l), _fileno(stderr));
+        setvbuf(stderr, NULL, _IONBF, 0);
+    }
+
+    remove(TLOG_NAME);
+
+    return l;
+}
+
+/******************************************************************************/
+int APIENTRY WinMain(HINSTANCE hInstance,
+                     HINSTANCE hPrevInstance,
+                     LPSTR     lpCmdLine,
+                     int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+//  UNREFERENCED_PARAMETER(lpCmdLine);
+    UNREFERENCED_PARAMETER(nCmdShow);
+
+    char **argv = NULL;
+    int argc = 0;
+    GetTempPathA(1024, TLOG_NAME);
+    strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
+
+    int i;
+    FILE *l = fopen(TLOG_NAME, "w");
+    setvbuf(l, NULL, _IONBF, 0);
+
+    for (i = 0; i < argc; i++)
+        fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
+    fprintf(l, "CMDLINE = \"%s\"\n", lpCmdLine);
+
+    argv = break_command_line(&argc, get_process_name(), lpCmdLine);
+    for (i = 0; i < argc; i++)
+        fprintf(l, "ARG[%d] = \"%s\"\n", i, argv[i]);
+
+    // TODO: Place code here.
+
+    // extract and capitalise the program name
+    progname = _strdup(basename((char*)argv[0]));
+    capitalise(progname);
+
+    l = reopen_log(l);
+
+    dwidth  = GetSystemMetrics(SM_CXSCREEN);
+    dheight = GetSystemMetrics(SM_CYSCREEN);
+
+    WndClass.cbClsExtra = 0;
+    WndClass.cbWndExtra = 0;
+    WndClass.hbrBackground = (HBRUSH)GetStockObject (WHITE_BRUSH);
+    WndClass.hCursor = LoadCursor (NULL, IDC_ARROW);
+    WndClass.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+    WndClass.hInstance = hInstance;
+    WndClass.lpfnWndProc = (WNDPROC) WndProc;
+    WndClass.lpszClassName = PLOT_CLASS;
+    WndClass.lpszMenuName = NULL;
+    WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+
+    if (!RegisterClass(&WndClass)){
+        MessageBox(NULL, (LPCTSTR)"Registration of WinClass Failed!",
+                                                           PLOT_CLASS, MB_OK);
+        return -1;
+    }
+
+#if 0
+    // Perform application initialization:
+    if (!InitInstance(hInstance, nCmdShow)) {
+        return FALSE;
+    }
+
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
+
+    MSG msg;
+
+    // Main message loop:
+    while (GetMessage(&msg, nullptr, 0, 0)) {
+        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+    return (int)msg.wParam;
+#endif
+
+    return _main_(argc, argv);
 }

@@ -213,7 +213,7 @@ static Font font_r, font_b, font_f;
 static unsigned int  win_width,  win_height;
 static unsigned int cwin_width, cwin_height;
 static Colormap cmap;
-static unsigned int display_width, display_height;
+static unsigned int dwidth, dheight;
 
 static int cur_x, cur_y;
 
@@ -1706,6 +1706,7 @@ int InitUI(int *width, int *height)
 {
     char AboutMnu[128];
     char *mnuTitle = NULL;
+#if 0
     display = XOpenDisplay(NULL);  /* open the default display */
     if ( display == NULL ) {
         fprintf(stderr, "Cannot open default display\n");
@@ -1713,8 +1714,8 @@ int InitUI(int *width, int *height)
     }
     screen = DefaultScreen(display);
     visual = DefaultVisual(display, screen);
-    display_width = DisplayWidth(display, screen);
-    display_height = DisplayHeight(display, screen);
+    dwidth = DisplayWidth(display, screen);
+    dheight = DisplayHeight(display, screen);
 
     /* get colours, probably better to get named colours, using this only if
      * that failed */
@@ -1739,8 +1740,10 @@ int InitUI(int *width, int *height)
     if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
         font_b = font_f;
 
-    if (  *width+30 > display_width )  *width  = display_width - 30;
-    if ( *height+80 > display_height ) *height = display_height - 80;
+#endif
+
+    if (  *width+30 > dwidth )  *width  = dwidth - 30;
+    if ( *height+80 > dheight ) *height = dheight - 80;
     win_width = *width; win_height = *height;
     _window = _new_window(10, 10, *width, *height, False);
     _main_window = _window;
@@ -1849,4 +1852,150 @@ void About(const char *message)
 
     _delete_window(dwin);
     _set_window(twin);
+}
+
+/******************************************************************************
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/
+#include <libgen.h>
+#include <sys/stat.h>
+
+int _main_(int argc, const char *argv[]);
+
+/*----------------------------------------------------------------------------*/
+void capitalise(char *s)
+{
+    int tog = 1;
+    while (*s) {
+        if ( tog ) *s = toupper(*s);
+        else       *s = tolower(*s);
+        tog = (*s == ' ' || *s == '_' );
+        s++;
+    }
+}
+
+/******************************************************************************/
+static const char** add_arg(int *argc, const char**xargv, const char *argv)
+{
+    int c = *argc;
+    c++; xargv = realloc(xargv, sizeof(char*)*c);
+    xargv[c-1] = strdup(argv);
+    *argc = c;
+    return xargv;
+}
+
+#define TLOG_NAME "/tmp/STD_LOG.txt"
+/******************************************************************************/
+FILE *reopen_log(FILE *l)
+{
+    char nbuf[128];
+    char *tbuf = NULL;
+    struct stat buf;
+
+    snprintf(nbuf, 120, "%s-Log.txt", progname);
+
+    if ( l != NULL ) {
+        fclose(l);
+        if ( (l = fopen(TLOG_NAME, "r")) != NULL ) {
+            fstat(fileno(l), &buf);
+            tbuf = malloc(buf.st_size+10);
+            fread(tbuf, 1, buf.st_size, l);
+            fclose(l);
+        }
+        remove(TLOG_NAME);
+    }
+
+    if ( (l = fopen(nbuf, "w")) != NULL ) {
+        setvbuf(l, NULL, _IONBF, 0);
+
+        if ( tbuf != NULL ) {
+            fwrite(tbuf, 1, buf.st_size, l);
+            free(tbuf);
+        }
+    }
+
+    if ( !isatty(fileno(stderr)) ) {
+        dup2(fileno(l), fileno(stderr));
+        setvbuf(stderr, NULL, _IONBF, 0);
+    }
+    if ( !isatty(fileno(stdout)) ) {
+        dup2(fileno(l), fileno(stdout));
+        setvbuf(stdout, NULL, _IONBF, 0);
+    }
+
+    return l;
+}
+
+/******************************************************************************/
+int main(int argc, const char *argv[])
+{
+    int i, xargc = 0;
+    const char **xargv = NULL;
+    char *cwd = NULL, *d = NULL, *f;
+    FILE *l = fopen(TLOG_NAME, "w");
+    setvbuf(l, NULL, _IONBF, 0);
+
+    for (i = 0; i < argc; i++)
+        fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
+
+    // extract and capitalise the program name
+    progname = strdup(basename((char*)argv[0]));
+    capitalise(progname);
+
+    xargv = add_arg(&xargc, xargv, progname);
+    for (i = 1; i < argc; i++) {
+        char *arg = (char*)argv[i];
+        if ( arg[0] != '-' ) {
+            f = basename(arg);
+            cwd = dirname(arg);
+            if ( d == NULL ) {
+                if ( chdir(cwd) != 0 ) { }
+                d = cwd;
+            }
+            xargv = add_arg(&xargc, xargv, f);
+        } else {
+            xargv = add_arg(&xargc, xargv, arg);
+        }
+    }
+
+    l = reopen_log(l);
+
+    for (i = 0; i < xargc; i++)
+        fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
+
+    display = XOpenDisplay(NULL);  /* open the default display */
+    if ( display == NULL ) {
+        fprintf(stderr, "Cannot open default display\n");
+        return -1;
+    }
+    screen = DefaultScreen(display);
+    visual = DefaultVisual(display, screen);
+    dwidth = DisplayWidth(display, screen);
+    dheight = DisplayHeight(display, screen);
+
+    /* get colours, probably better to get named colours, using this only if
+     * that failed */
+    Black = BlackPixel(display, screen);
+    White = WhitePixel(display, screen);
+
+    cmap = DefaultColormap(display, screen);
+
+    LightGrey = MakeColour(200, 200, 206);
+    Grey = MakeColour(128, 128, 134);
+    Red = MakeColour(255, 0, 0);
+    Green = MakeColour(0, 255, 0);
+    Blue = MakeColour(0, 0, 255);
+
+    /* get fonts */
+    if ( (font_f = XLoadFont(display, FONT_F)) == 0 ) {
+        fprintf(stderr, "Cannot allocate fixed font\n");
+        exit(1);
+    }
+    if ( (font_r = XLoadFont(display, FONT_R)) == 0 )
+        font_r = font_f;
+    if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
+        font_b = font_f;
+
+    return _main_(xargc, xargv);
 }
