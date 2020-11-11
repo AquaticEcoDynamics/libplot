@@ -1706,7 +1706,8 @@ int InitUI(int *width, int *height)
 {
     char AboutMnu[128];
     char *mnuTitle = NULL;
-#if 0
+
+#if 1
     display = XOpenDisplay(NULL);  /* open the default display */
     if ( display == NULL ) {
         fprintf(stderr, "Cannot open default display\n");
@@ -1900,7 +1901,7 @@ FILE *reopen_log(FILE *l)
         if ( (l = fopen(TLOG_NAME, "r")) != NULL ) {
             fstat(fileno(l), &buf);
             tbuf = malloc(buf.st_size+10);
-            fread(tbuf, 1, buf.st_size, l);
+            buf.st_size = fread(tbuf, 1, buf.st_size, l);
             fclose(l);
         }
         remove(TLOG_NAME);
@@ -1964,6 +1965,7 @@ int main(int argc, const char *argv[])
     for (i = 0; i < xargc; i++)
         fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
 
+#if 1
     display = XOpenDisplay(NULL);  /* open the default display */
     if ( display == NULL ) {
         fprintf(stderr, "Cannot open default display\n");
@@ -1996,6 +1998,7 @@ int main(int argc, const char *argv[])
         font_r = font_f;
     if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
         font_b = font_f;
+#endif
 
     return _main_(xargc, xargv);
 }

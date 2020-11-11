@@ -279,6 +279,27 @@ static WindowItem *_find_item_of_type(Window win, int type)
  ******************************************************************************/
 int InitUI(int *width, int *height) {
     HINSTANCE hInstance = NULL;
+#if 1
+    dwidth  = GetSystemMetrics(SM_CXSCREEN);
+    dheight = GetSystemMetrics(SM_CYSCREEN);
+
+    WndClass.cbClsExtra = 0;
+    WndClass.cbWndExtra = 0;
+    WndClass.hbrBackground = (HBRUSH)GetStockObject (WHITE_BRUSH);
+    WndClass.hCursor = LoadCursor (NULL, IDC_ARROW);
+    WndClass.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+    WndClass.hInstance = hInstance;
+    WndClass.lpfnWndProc = (WNDPROC) WndProc;
+    WndClass.lpszClassName = PLOT_CLASS;
+    WndClass.lpszMenuName = NULL;
+    WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+
+    if (!RegisterClass(&WndClass)){
+        MessageBox(NULL, (LPCTSTR)"Registration of WinClass Failed!",
+                                                           PLOT_CLASS, MB_OK);
+        return -1;
+    }
+#endif
 
     /* adjust height/width so window will fit on the display */
     if ( dheight - 40 < *height ) *height = dheight - 40;
@@ -918,27 +939,43 @@ char *basename(const char *s)
 }
 
 /*----------------------------------------------------------------------------*/
-static char *get_process_name()
+int is_plots(const char *fn)
 {
-    TCHAR szFileName[MAX_PATH];
+    struct stat buf;
+    char *tbuf = NULL;
+    FILE *f;
+    int ret = 0;
 
-    GetModuleFileName(NULL, szFileName, MAX_PATH);
-    return _strdup(szFileName);
+    if ( (f = fopen(fn, "r")) != NULL ) {
+        fstat(_fileno(f), &buf);
+        tbuf = malloc(buf.st_size+10);
+        fread(tbuf, 1, buf.st_size, f);
+        fclose(f);
+        if ( strstr(tbuf, "&plots", buf.st_size) != NULL ) {
+            ret = 1;
+        }
+        free(tbuf);
+    }
+    return ret;
 }
 
 /******************************************************************************/
-char ** break_command_line(int *argc, char *processname, char *lpCmdLine)
+char ** break_command_line(int *argc, char *lpCmdLine)
 {
     char **args;
     char *s = lpCmdLine, *t;
-    int  nargs = 1, tog = 0, l;
+    int  nargs = 1, tog = 0, l, havx = 0;
 
     char *targ = NULL;
     char *d = NULL, *f, *td;
 
+    TCHAR szFileName[MAX_PATH];
+
+    GetModuleFileName(NULL, szFileName, MAX_PATH);
+
     targ = malloc(sizeof(char)*(strlen(s)+1));
     args = malloc(sizeof(char*) * 2);
-    args[0] = processname;
+    args[0] = _strdup(szFileName);
     args[1] = NULL;
 
     while (s != NULL) {
@@ -966,13 +1003,25 @@ char ** break_command_line(int *argc, char *processname, char *lpCmdLine)
         td = dirname(targ);
         f = basename(targ);
         if ( d == NULL ) {
-//          if ( chdir(td) != 0 ) { }
             if ( SetCurrentDirectory(td) != 0 ) { }
             d = td;
+        }
+        if ( is_plots(f) ) {
+            args[nargs-1] = _strdup("--xdisp");
+            nargs++;
+            args = realloc(args, sizeof(char*)*(nargs+1));
+            args[nargs] = NULL;
+            havx = 1;
         }
         args[nargs-1] = _strdup(f);
 
         if (*s == 0) break;
+    }
+    if ( !havx ) {
+        nargs++;
+        args = realloc(args, sizeof(char*)*(nargs+1));
+        args[nargs-1] = _strdup("--xdisp");
+        args[nargs] = NULL;
     }
 
     free(targ);
@@ -1027,14 +1076,22 @@ FILE *reopen_log(FILE *l)
         }
     }
 
-    if (freopen(TLOG_NAME, "w", stdout) != NULL) {
-        _dup2(_fileno(l), _fileno(stdout));
-        setvbuf(stdout, NULL, _IONBF, 0);
-    }
-    if (freopen(TLOG_NAME, "w", stderr) != NULL) {
-        _dup2(_fileno(l), _fileno(stderr));
-        setvbuf(stderr, NULL, _IONBF, 0);
-    }
+// on non-console applications stdout and stderr have fileno == -2
+// however the only way that turns up is if it is built as a console app
+// so not much point looking for that case
+//  if ( _fileno(stdout) < -1 ) {
+        if (freopen(TLOG_NAME, "w", stdout) != NULL) {
+            _dup2(_fileno(l), _fileno(stdout));
+            setvbuf(stdout, NULL, _IONBF, 0);
+        }
+//  }
+
+//  if ( _fileno(stderr) < -1 ) {
+        if (freopen(TLOG_NAME, "w", stderr) != NULL) {
+            _dup2(_fileno(l), _fileno(stderr));
+            setvbuf(stderr, NULL, _IONBF, 0);
+        }
+//  }
 
     remove(TLOG_NAME);
 
@@ -1056,17 +1113,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     GetTempPathA(1024, TLOG_NAME);
     strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
 
-    int i;
+//  int i;
     FILE *l = fopen(TLOG_NAME, "w");
     setvbuf(l, NULL, _IONBF, 0);
 
-    for (i = 0; i < argc; i++)
-        fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
-    fprintf(l, "CMDLINE = \"%s\"\n", lpCmdLine);
-
-    argv = break_command_line(&argc, get_process_name(), lpCmdLine);
-    for (i = 0; i < argc; i++)
-        fprintf(l, "ARG[%d] = \"%s\"\n", i, argv[i]);
+    argv = break_command_line(&argc, lpCmdLine);
+//  for (i = 0; i < argc; i++)
+//      fprintf(l, "ARG[%d] = \"%s\"\n", i, argv[i]);
 
     // TODO: Place code here.
 
@@ -1076,6 +1129,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
     l = reopen_log(l);
 
+#if 0
     dwidth  = GetSystemMetrics(SM_CXSCREEN);
     dheight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -1095,6 +1149,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
                                                            PLOT_CLASS, MB_OK);
         return -1;
     }
+#endif
 
 #if 0
     // Perform application initialization:
