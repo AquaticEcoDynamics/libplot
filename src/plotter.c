@@ -765,8 +765,12 @@ void plot_value(int plot, double x, double y, double z)
 #endif
 
     if ( !_plots[plot].havez ) {
-        subplot = trunc(z) - 1;
-        colour = z * (256 / _plots[plot].havey);
+        int zi = trunc(z);
+        subplot = zi;
+        if ( zi == 0 )
+            colour = black;
+        else
+            colour = z * (256 / (_plots[plot].havey-1));
         z = y;
     }
     if ( _plots[plot].zinit ) {
