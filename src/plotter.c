@@ -67,6 +67,7 @@ typedef struct _plot_ {
     int    count;
     int    maxx, maxy, lasty;
     int   *lastys;
+    int   *counts;
     int    xstep, xposp;
     int    ystep, yposp;
     int    zstep, zposp;
@@ -446,6 +447,7 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
     _plots[last_plot].zinit = 0;
     _plots[last_plot].version = NULL;
     _plots[last_plot].lastys = NULL;
+    _plots[last_plot].counts = NULL;
 
     return last_plot;
 }
@@ -483,6 +485,10 @@ int add_plot_subplot_y(int plot)
         _plots[plot].havey++;
     _plots[last_plot].lastys = realloc(_plots[last_plot].lastys,
                                          sizeof(int)*_plots[plot].havey);
+    _plots[last_plot].counts = realloc(_plots[last_plot].counts,
+                                         sizeof(int)*_plots[plot].havey);
+    _plots[last_plot].lastys[_plots[plot].havey-1] = 0;
+    _plots[last_plot].counts[_plots[plot].havey-1] = 0;
     return _plots[plot].havey;
 }
 
@@ -759,11 +765,6 @@ void plot_value(int plot, double x, double y, double z)
 
     if ( xpos <= xposp ) xpos = xposp + 1;
 
-#if DEBUG
-//  if ( plot == 3 )
-    fprintf(stderr, "    xposp = %d xpos = %d ypos = %d xscale = %f count %d\n", xposp, xpos, ypos, _plots[plot].xscale, _plots[plot].count);
-#endif
-
     if ( !_plots[plot].havez ) {
         int zi = trunc(z);
         subplot = zi;
@@ -804,10 +805,11 @@ void plot_value(int plot, double x, double y, double z)
             }
         } else {
             if ( _plots[plot].havey > 1 ) {
-                if ( _plots[plot].count > 0 )
+                if ( _plots[plot].counts[subplot] > 0 )
                     gdImageLine(_plots[plot].im, xposp, _plots[plot].lastys[subplot], xpos, ypos, colour);
+
                 _plots[plot].lastys[subplot] = ypos;
-                if ( subplot >= (_plots[plot].havey-1) ) _plots[plot].count++;
+                _plots[plot].counts[subplot]++;
             } else {
                 colour = black;
                 if ( _plots[plot].count == 0 ) {
@@ -815,14 +817,12 @@ void plot_value(int plot, double x, double y, double z)
                     _plots[plot].lasty = ypos;
                 } else
                     gdImageLine(_plots[plot].im, xposp, _plots[plot].lasty, xpos, ypos, black);
-                _plots[plot].count++;
             }
         }
+        _plots[plot].count++;
+        _plots[plot].lastx = x;
+        _plots[plot].lasty = ypos;
     }
-
-    if ( _plots[plot].havez ) _plots[plot].count++;
-    _plots[plot].lastx = x;
-    _plots[plot].lasty = ypos;
 
 #if DEBUG
     fprintf(stderr, "plot %d xpos %d (%8.2lf) ypos %d (%8.2lf %8.2lf %8.2lf) colour %d (%8.2lf)\n",
