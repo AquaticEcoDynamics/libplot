@@ -1968,36 +1968,38 @@ int main(int argc, const char *argv[])
 #if 1
     display = XOpenDisplay(NULL);  /* open the default display */
     if ( display == NULL ) {
+        xargv = add_arg(&xargc, xargv, "--no-gui");
         fprintf(stderr, "Cannot open default display\n");
-        return -1;
+//      return -1;
+    } else {
+        screen = DefaultScreen(display);
+        visual = DefaultVisual(display, screen);
+        dwidth = DisplayWidth(display, screen);
+        dheight = DisplayHeight(display, screen);
+
+        /* get colours, probably better to get named colours, using this only
+         * if that failed */
+        Black = BlackPixel(display, screen);
+        White = WhitePixel(display, screen);
+
+        cmap = DefaultColormap(display, screen);
+
+        LightGrey = MakeColour(200, 200, 206);
+        Grey = MakeColour(128, 128, 134);
+        Red = MakeColour(255, 0, 0);
+        Green = MakeColour(0, 255, 0);
+        Blue = MakeColour(0, 0, 255);
+
+        /* get fonts */
+        if ( (font_f = XLoadFont(display, FONT_F)) == 0 ) {
+            fprintf(stderr, "Cannot allocate fixed font\n");
+            exit(1);
+        }
+        if ( (font_r = XLoadFont(display, FONT_R)) == 0 )
+            font_r = font_f;
+        if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
+            font_b = font_f;
     }
-    screen = DefaultScreen(display);
-    visual = DefaultVisual(display, screen);
-    dwidth = DisplayWidth(display, screen);
-    dheight = DisplayHeight(display, screen);
-
-    /* get colours, probably better to get named colours, using this only if
-     * that failed */
-    Black = BlackPixel(display, screen);
-    White = WhitePixel(display, screen);
-
-    cmap = DefaultColormap(display, screen);
-
-    LightGrey = MakeColour(200, 200, 206);
-    Grey = MakeColour(128, 128, 134);
-    Red = MakeColour(255, 0, 0);
-    Green = MakeColour(0, 255, 0);
-    Blue = MakeColour(0, 0, 255);
-
-    /* get fonts */
-    if ( (font_f = XLoadFont(display, FONT_F)) == 0 ) {
-        fprintf(stderr, "Cannot allocate fixed font\n");
-        exit(1);
-    }
-    if ( (font_r = XLoadFont(display, FONT_R)) == 0 )
-        font_r = font_f;
-    if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
-        font_b = font_f;
 #endif
 
     return _main_(xargc, xargv);
