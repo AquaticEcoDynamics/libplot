@@ -67,11 +67,13 @@ ifeq ($(WITH_XPLOTS),true)
   CFLAGS+=-DXPLOTS
 endif
 
-INCLUDES=-I${incdir} -I. -I/opt/local/include
+INCLUDES=-I${incdir} -I.
 LIBS=-lgd -lpng -ljpeg -lm
 ifeq ($(OSTYPE),Darwin)
+  INCLUDES+=-I/opt/local/include
   LIBS+=-framework Cocoa -L/opt/local/lib
 else
+  INCLUDES+=-I/usr/local/include
   LIBS+=-lX11
 endif
 
