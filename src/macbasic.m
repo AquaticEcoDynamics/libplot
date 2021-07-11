@@ -722,6 +722,7 @@ int is_plots(const char *fn)
     return ret;
 }
 
+#if 0
 #define TLOG_NAME "/tmp/STD_LOG.txt"
 /******************************************************************************/
 FILE *reopen_log(FILE *l)
@@ -763,6 +764,7 @@ FILE *reopen_log(FILE *l)
 
     return l;
 }
+#endif
 
 /******************************************************************************/
 int main(int argc, const char *argv[])
@@ -771,9 +773,9 @@ int main(int argc, const char *argv[])
     int i, xargc = 0;
     const char **xargv = NULL;
     int havx = 0;
-    FILE *l = fopen(TLOG_NAME, "w");
+//  FILE *l = fopen(TLOG_NAME, "w");
 
-    setvbuf(l, NULL, _IONBF, 0);
+//  setvbuf(l, NULL, _IONBF, 0);
 
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -805,7 +807,7 @@ int main(int argc, const char *argv[])
 //  fprintf(l, "CMD[%d] = \"%s\"\n", 0, argv[0]);
     xargv = add_arg(&xargc, xargv, progname);
     for (i = 1; i < argc; i++) {
-        fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
+//      fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
         xargv = add_arg(&xargc, xargv, argv[i]);
     }
 
@@ -840,7 +842,7 @@ int main(int argc, const char *argv[])
 //      fprintf(l, "X_CMD[%d] = \"%s\"\n", i, xargv[i]);
 //  }
 
-    l = reopen_log(l);
+//  l = reopen_log(l);
 
     /*------------------------------------------------------------------------*/
     return _main_(xargc, xargv);

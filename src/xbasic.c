@@ -1886,6 +1886,7 @@ static const char** add_arg(int *argc, const char**xargv, const char *argv)
     return xargv;
 }
 
+#if 0
 #define TLOG_NAME "/tmp/STD_LOG.txt"
 /******************************************************************************/
 FILE *reopen_log(FILE *l)
@@ -1927,6 +1928,7 @@ FILE *reopen_log(FILE *l)
 
     return l;
 }
+#endif
 
 /******************************************************************************/
 int main(int argc, const char *argv[])
@@ -1934,11 +1936,11 @@ int main(int argc, const char *argv[])
     int i, xargc = 0;
     const char **xargv = NULL;
     char *cwd = NULL, *d = NULL, *f;
-    FILE *l = fopen(TLOG_NAME, "w");
-    setvbuf(l, NULL, _IONBF, 0);
+//  FILE *l = fopen(TLOG_NAME, "w");
+//  setvbuf(l, NULL, _IONBF, 0);
 
-    for (i = 0; i < argc; i++)
-        fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
+//  for (i = 0; i < argc; i++)
+//      fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
 
     // extract and capitalise the program name
     progname = strdup(basename((char*)argv[0]));
@@ -1960,10 +1962,10 @@ int main(int argc, const char *argv[])
         }
     }
 
-    l = reopen_log(l);
+//  l = reopen_log(l);
 
-    for (i = 0; i < xargc; i++)
-        fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
+//  for (i = 0; i < xargc; i++)
+//      fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
 
 #if 1
     display = XOpenDisplay(NULL);  /* open the default display */

@@ -1044,6 +1044,7 @@ void capitalise(char *s)
 
 int _main_(int argc, const char *argv[]);
 
+#if 0
 static char TLOG_NAME[1024];
 
 /******************************************************************************/
@@ -1097,6 +1098,7 @@ FILE *reopen_log(FILE *l)
 
     return l;
 }
+#endif
 
 /******************************************************************************/
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -1114,8 +1116,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
 
 //  int i;
-    FILE *l = fopen(TLOG_NAME, "w");
-    setvbuf(l, NULL, _IONBF, 0);
+//  FILE *l = fopen(TLOG_NAME, "w");
+//  setvbuf(l, NULL, _IONBF, 0);
 
     argv = break_command_line(&argc, lpCmdLine);
 //  for (i = 0; i < argc; i++)
@@ -1127,7 +1129,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     progname = _strdup(basename((char*)argv[0]));
     capitalise(progname);
 
-    l = reopen_log(l);
+//  l = reopen_log(l);
 
 #if 0
     dwidth  = GetSystemMetrics(SM_CXSCREEN);
