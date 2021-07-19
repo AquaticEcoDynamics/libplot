@@ -1112,8 +1112,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
     char **argv = NULL;
     int argc = 0;
-    GetTempPathA(1024, TLOG_NAME);
-    strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
+//  GetTempPathA(1024, TLOG_NAME);
+//  strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
 
 //  int i;
 //  FILE *l = fopen(TLOG_NAME, "w");
@@ -1172,6 +1172,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     }
     return (int)msg.wParam;
 #endif
+
+    return _main_(argc, argv);
+}
+
+int main(int argc, const char *argv[])
+{
+    // extract and capitalise the program name
+    progname = _strdup(basename((char*)argv[0]));
+    capitalise(progname);
 
     return _main_(argc, argv);
 }
