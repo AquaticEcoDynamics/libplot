@@ -59,7 +59,7 @@ OBJS=${objdir}/${uibasic}.o \
      ${objdir}/plotter.o
 
 CFLAGS=-O3
-ifneq ($(OSTYPE),Darwin)
+ifeq ($(OSTYPE),Linux)
   CFLAGS+=-Wno-format-truncation
 endif
 
