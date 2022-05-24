@@ -777,6 +777,14 @@ int main(int argc, const char *argv[])
 
 //  setvbuf(l, NULL, _IONBF, 0);
 
+    if (argc) {
+        for (i=0; i<argc; i++) {
+            if (strcmp(argv[i], "--no-gui") == 0) {
+                return _main_(argc, argv);
+            }
+        }
+    }
+
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
