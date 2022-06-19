@@ -125,8 +125,9 @@ static void calendar_date(int julian, int *yyyy, int *mm, int *dd);
 char *strndup(const char *s, int len)
 {
     size_t l = strlen(s);
-    char *t = malloc(min(l,len)+1);
-    if ( t != NULL ) { strncpy(t,s,min(l,len)+1); t[min(l,len)] = 0; }
+    size_t min_l = (l < len)?l:len;
+    char *t = malloc(min_l+1);
+    if ( t != NULL ) { strncpy(t,s,min_l+1); t[min_l] = 0; }
     return t;
 }
 char *ctime_r(const time_t *timep, char *buf)
@@ -328,12 +329,14 @@ void drawText(gdImagePtr im, int left, int right, int top, int bottom,
 }
 
 /******************************************************************************/
+#ifndef _WIN32
 static void font_metric(const char*f, int sz, int *u, int *d)
 {
     int brect[8];
     gdImageStringFT(NULL, &brect[0], black, (char*)f, sz, 0.0, 0, 0, "Dgq");
     *u = brect[5]; *d = brect[3];
 }
+#endif
 
 /******************************************************************************/
 void set_plot_font_(int *which, int *size, const char *font, int *len)

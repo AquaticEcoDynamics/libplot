@@ -130,8 +130,8 @@ typedef struct _bar_item {
 
 
 /******************************************************************************/
-static Window _new_window(int left, int top,
-                                          int width, int height, int transient);
+// static Window _new_window(int left, int top,
+//                                           int width, int height, int transient);
 static int Alert(const char *message, const char *but1, const char*but2);
 static void About(const char *message);
 static int _check_event(void);
@@ -140,7 +140,7 @@ static void _add_window(Window win);
 static void _set_window(Window win);
 static WindowPtr _find_window(Window win);
 
-static void _dialog_key(Window win, char key);
+// static void _dialog_key(Window win, char key);
 static void _draw_picture(PictureItem *pic);
 
 static void _draw_window_items(void);
@@ -238,6 +238,7 @@ static WindowItem *_find_item(int itm_id)
     return NULL;
 }
 
+#if 0
 /******************************************************************************/
 static WindowItem *_which_item(int x, int y)
 {
@@ -273,6 +274,7 @@ static WindowItem *_find_item_of_type(Window win, int type)
 
     return NULL;
 }
+#endif
 
 /******************************************************************************
  *                                                                            *
@@ -951,7 +953,7 @@ int is_plots(const char *fn)
         tbuf = malloc(buf.st_size+10);
         fread(tbuf, 1, buf.st_size, f);
         fclose(f);
-        if ( strstr(tbuf, "&plots", buf.st_size) != NULL ) {
+        if ( strstr(tbuf, "&plots") != NULL ) {
             ret = 1;
         }
         free(tbuf);
@@ -1173,7 +1175,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     return (int)msg.wParam;
 #endif
 
-    return _main_(argc, argv);
+    return _main_(argc, (const char **)argv);
 }
 
 int main(int argc, const char *argv[])

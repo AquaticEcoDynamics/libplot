@@ -24,8 +24,16 @@
 #                                                                             #
 ###############################################################################
 
-OSTYPE=$(shell uname -s)
-OC=clang
+ifeq ($(shell uname -o),Msys)
+  OSTYPE=$(shell uname -o)
+else
+  OSTYPE=$(shell uname -s)
+endif
+srcdir=src
+incdir=include
+INCLUDES=-I${incdir} -I.
+LIBS=-lgd -lpng -ljpeg -lm
+CFLAGS=-O3
 
 ifeq ($(WITH_XPLOTS),)
   WITH_XPLOTS=true
@@ -35,13 +43,16 @@ ifeq ($(OSTYPE),Darwin)
   uibasic=macbasic
   srcext=m
   CC=clang
+else ifeq ($(OSTYPE),Msys)
+  uibasic=winbasic
+  srcext=c
+  CC=gcc
+  INCLUDES+=-I../win-3rd-party/x64-Release/include -I../win
 else
   uibasic=xbasic
   srcext=c
 endif
 
-srcdir=src
-incdir=include
 ifeq ($(SINGLE),true)
   objdir=obj_s
   TARGET=lib/libplot_s.a
@@ -58,7 +69,6 @@ OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
      ${objdir}/plotter.o
 
-CFLAGS=-O3
 ifeq ($(OSTYPE),Linux)
   CFLAGS+=-Wno-format-truncation
 endif
@@ -67,8 +77,6 @@ ifeq ($(WITH_XPLOTS),true)
   CFLAGS+=-DXPLOTS
 endif
 
-INCLUDES=-I${incdir} -I.
-LIBS=-lgd -lpng -ljpeg -lm
 ifeq ($(OSTYPE),Darwin)
   INCLUDES+=-I/opt/local/include
   LIBS+=-framework Cocoa -L/opt/local/lib
