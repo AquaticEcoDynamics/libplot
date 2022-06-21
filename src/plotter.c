@@ -122,7 +122,7 @@ static void calendar_date(int julian, int *yyyy, int *mm, int *dd);
 
 /******************************************************************************/
 #ifdef _WIN32
-char *strndup(const char *s, int len)
+char *strndup(const char *s, size_t len)
 {
     size_t l = strlen(s);
     size_t min_l = (l < len)?l:len;

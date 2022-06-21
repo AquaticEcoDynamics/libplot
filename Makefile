@@ -7,7 +7,7 @@
 #      School of Agriculture and Environment                                  #
 #      The University of Western Australia                                    #
 #                                                                             #
-#  Copyright 2013 - 2018 -  The University of Western Australia               #
+#  Copyright 2013 - 2022 -  The University of Western Australia               #
 #                                                                             #
 #   libplot is free software: you can redistribute it and/or modify           #
 #   it under the terms of the GNU General Public License as published by      #
@@ -24,10 +24,14 @@
 #                                                                             #
 ###############################################################################
 
-ifeq ($(shell uname -o),Msys)
-  OSTYPE=$(shell uname -o)
-else
+ifeq ($(shell uname),Linux)
   OSTYPE=$(shell uname -s)
+else ifeq ($(shell uname),Darwin)
+  OSTYPE=$(shell uname -s)
+else ifeq ($(shell uname),FreeBSD)
+  OSTYPE=$(shell uname -s)
+else
+  OSTYPE=$(shell uname -o)
 endif
 srcdir=src
 incdir=include
