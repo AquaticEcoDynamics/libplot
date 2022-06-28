@@ -31,8 +31,7 @@ else ifeq ($(shell uname),Darwin)
 else ifeq ($(shell uname),FreeBSD)
   OSTYPE=$(shell uname -s)
 else
-  # For now we default to windows "Msys" when it's not linux, mac or freebsd
-  OSTYPE=Msys
+  OSTYPE=$(shell uname -o)
 endif
 
 srcdir=src
