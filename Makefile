@@ -115,7 +115,7 @@ lib:
 	@mkdir lib
 
 ${objdir}:
-	@echo OSTYPE is $OSTYPE
+	@echo OSTYPE is ${OSTYPE}
 	@mkdir ${objdir}
 
 ${objdir}/%.o: ${srcdir}/%.c ${incdir}/%.h
