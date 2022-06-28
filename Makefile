@@ -24,16 +24,16 @@
 #                                                                             #
 ###############################################################################
 
-ifeq ($(shell uname),Linux)
-  OSTYPE=$(shell uname -s)
-else ifeq ($(shell uname),Darwin)
-  OSTYPE=$(shell uname -s)
-else ifeq ($(shell uname),FreeBSD)
-  OSTYPE=$(shell uname -s)
-else
+#ifeq ($(shell uname),Linux)
+#  OSTYPE=$(shell uname -s)
+#else ifeq ($(shell uname),Darwin)
+#  OSTYPE=$(shell uname -s)
+#else ifeq ($(shell uname),FreeBSD)
+#  OSTYPE=$(shell uname -s)
+#else
   # For now we default to windows "Msys" when it's not linux, mac or freebsd
   OSTYPE=Msys
-endif
+#endif
 srcdir=src
 incdir=include
 INCLUDES=-I${incdir} -I.
