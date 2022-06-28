@@ -2,6 +2,8 @@
 #                                                                             #
 # Makefile for libplot                                                        #
 #                                                                             #
+#  this is a modified version for building on github Msys only                #
+#                                                                             #
 #  Developed by :                                                             #
 #      AquaticEcoDynamics (AED) Group                                         #
 #      School of Agriculture and Environment                                  #
@@ -24,16 +26,7 @@
 #                                                                             #
 ###############################################################################
 
-ifeq ($(shell uname),Linux)
-  OSTYPE=$(shell uname -s)
-else ifeq ($(shell uname),Darwin)
-  OSTYPE=$(shell uname -s)
-else ifeq ($(shell uname),FreeBSD)
-  OSTYPE=$(shell uname -s)
-else
-  # For now we default to windows "Msys" when it's not linux, mac or freebsd
-  OSTYPE=Msys
-endif
+OSTYPE=Msys
 
 srcdir=src
 incdir=include
@@ -41,31 +34,15 @@ INCLUDES=-I${incdir} -I.
 LIBS=-lgd -lpng -ljpeg -lm
 CFLAGS=-O3
 
-ifeq ($(WITH_XPLOTS),)
-  WITH_XPLOTS=true
-endif
+WITH_XPLOTS=true
 
-ifeq ($(OSTYPE),Darwin)
-  uibasic=macbasic
-  srcext=m
-  CC=clang
-else ifeq ($(OSTYPE),Msys)
-  uibasic=winbasic
-  srcext=c
-  CC=gcc
-  INCLUDES+=-I../win-3rd-party/x64-Release/include -I../win
-else
-  uibasic=xbasic
-  srcext=c
-endif
+uibasic=winbasic
+srcext=c
+CC=gcc
+INCLUDES+=-I../win-3rd-party/x64-Release/include -I../win
 
-ifeq ($(SINGLE),true)
-  objdir=obj_s
-  TARGET=lib/libplot_s.a
-else
-  objdir=obj
-  TARGET=lib/libplot.a
-endif
+objdir=obj
+TARGET=lib/libplot.a
 
 SRCS=${srcdir}/${uibasic}.${srcext} \
      ${srcdir}/colours.c \
@@ -75,25 +52,7 @@ OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
      ${objdir}/plotter.o
 
-ifeq ($(OSTYPE),Linux)
-  CFLAGS+=-Wno-format-truncation
-endif
-
-ifeq ($(WITH_XPLOTS),true)
-  CFLAGS+=-DXPLOTS
-endif
-
-ifeq ($(OSTYPE),Darwin)
-  INCLUDES+=-I/opt/local/include
-  LIBS+=-framework Cocoa -L/opt/local/lib
-else ifneq ($(OSTYPE),Msys)
-  INCLUDES+=-I/usr/local/include
-  LIBS+=-lX11
-endif
-
-ifeq ($(SINGLE),true)
-  CFLAGS += -DSINGLE=1
-endif
+CFLAGS+=-DXPLOTS
 
 all: ${TARGET}
 
