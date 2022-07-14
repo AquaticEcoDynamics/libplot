@@ -52,7 +52,6 @@ else ifeq ($(OSTYPE),Msys)
   uibasic=winbasic
   srcext=c
   CC=gcc
-  INCLUDES+=-I../win-3rd-party/x64-Release/include -I../win
 else
   uibasic=xbasic
   srcext=c
@@ -88,6 +87,9 @@ ifeq ($(OSTYPE),Darwin)
 else ifneq ($(OSTYPE),Msys)
   INCLUDES+=-I/usr/local/include
   LIBS+=-lX11
+else
+  INCLUDES+=-I../ancillary/windows/msys/include -I../win
+  LIBS+=-L../ancillary/windows/msys/include -I../win
 endif
 
 ifeq ($(SINGLE),true)
