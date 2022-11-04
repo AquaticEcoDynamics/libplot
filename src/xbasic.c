@@ -180,6 +180,8 @@ static void _draw_window_items(void);
 static void _draw_mbar(MenuBar *mbar);
 static void _draw_menu(Menu *menu);
 
+static XFontStruct *__find_font(Font f);
+
 /******************************************************************************/
 static void _draw_string(int h, int v, Font font, const char *str);
 static void _make_arcs(XArc *arcs, int left, int top, int right, int bottom,
@@ -207,7 +209,7 @@ unsigned long int Black, White, Grey, LightGrey;
 unsigned long int Red, Green, Blue;
 
 static int screen = -1;
-static Visual *visual;
+static Visual *visual = NULL;
 static Font font_r, font_b, font_f;
 
 static unsigned int  win_width,  win_height;
@@ -383,15 +385,29 @@ static void _set_window(Window win)
 }
 
 /******************************************************************************/
+static void _purge_menu(Menu *mnu)
+{
+    int i;
+
+    for (i = 0; i < mnu->nItems; i++) {
+        free(mnu->items[i]);
+    }
+    free(mnu->items);
+    free(mnu->flags);
+    free(mnu->key);
+}
 static void _delete_window(Window win)
 {
     WindowPtr wptr = _win_lst;
     WindowPtr tptr = NULL;
-    WindowItem *item = NULL;
+    WindowItem *item = NULL, *titem = NULL;
+    PictureItem *pic = NULL;
+    MenuBar *mb = NULL;
+    int i;
 
     XDestroyWindow(display, win);
 
-    if ( wptr == NULL ) return; /* cant be in t' list */
+    if ( wptr == NULL ) return; /* cant be in t'list */
 
     if ( wptr->win == win ) {
         tptr = wptr;
@@ -421,22 +437,37 @@ static void _delete_window(Window win)
     item = tptr->itm_lst;
 
     while ( item != NULL ) {
-        if ( item->type == PIC_ITEM ) {
-            PictureItem *pic = item->data;
-            if ( pic->image != NULL )
-                XDestroyImage(pic->image);
-            free(item->data);
+        switch ( item->type ) {
+            case PIC_ITEM :
+                pic = item->data;
+                if ( pic->image != NULL )
+                    XDestroyImage(pic->image);
+                break;
+            case CTL_ITEM :
+                free(((Control*)(item->data))->title);
+                break;
+            case TXT_ITEM :
+            case EDT_ITEM :
+                break;
+            case MNU_ITEM :
+            //  _purge_menu(item->data);
+                break;
+            case WIN_MENU :
+                mb = item->data;
+                for (i = 0; i < mb->nMenus; i++)
+                    _purge_menu(&(mb->menus)[i]);
+            //  free(mb->menus);
+                break;
+            default :
+                break;
         }
-        else if (item->type == CTL_ITEM ) {
-            free(((Control*)(item->data))->title);
-            free(item->data);
-        }
-        else if (item->type == TXT_ITEM ||
-                 item->type == EDT_ITEM ) {
-            free(item->data);
-        }
+        free(item->data);
+        titem = item;
         item = item->next;
+        free(titem);
     }
+
+    XFreeGC(display, tptr->gc);
     free(tptr);
 }
 
@@ -815,7 +846,7 @@ void _draw_control(Control * ctl)
             _frame_round_rect(left, top, width, height, 16, 16);
 
             str_length = strlen(ctl->title);
-            title_length = XTextWidth(XQueryFont(display, font_b),
+            title_length = XTextWidth(__find_font(font_b),
                                                         ctl->title, str_length);
             // this is how to grey out a control
             if ( ctl->hilite == 255 ) XSetForeground(display, _gc, Grey);
@@ -1053,7 +1084,7 @@ static void _tickle_carat(Window win, int force)
     name_buf = item->data;
     len = strlen(name_buf);
 
-    left += XTextWidth(XQueryFont(display, font_r), name_buf, len);
+    left += XTextWidth(__find_font(font_r), name_buf, len);
     right = left + 1;
     if ( _carat_on )
         XClearArea(display, win, left, top, right-left, bottom-top, False);
@@ -1088,14 +1119,14 @@ static void _dialog_key(Window win, char key)
     name_buf = item->data;
     len = strlen(name_buf);
 
-    left += XTextWidth(XQueryFont(display, font_r), name_buf, len);
+    left += XTextWidth(__find_font(font_r), name_buf, len);
 
     if (key == 0x08 || key == 0x7F) { /* backspace or delete */
         if ( len ) {
             ch = name_buf[len-1];
             name_buf[len-1] = 0;
             right = left;
-            left -= XTextWidth(XQueryFont(display, font_r), &ch, 1);
+            left -= XTextWidth(__find_font(font_r), &ch, 1);
             XClearArea(display, win, left, top, right-left, bottom-top, False);
         }
     } else {
@@ -1286,7 +1317,7 @@ static void _draw_mbar(MenuBar *mbar)
         mbar->menus[i].h = h;
         _draw_string(h+6, 16, font_b, str);
         mbar->menus[i].tsize =
-               (10 + XTextWidth(XQueryFont(display, font_b), str, strlen(str)));
+               (10 + XTextWidth(__find_font(font_b), str, strlen(str)));
         h += mbar->menus[i].tsize;
     }
 }
@@ -1300,7 +1331,7 @@ static void _draw_menu_item(Menu *menu, int item, int v)
     if ( menu->key[item] != 0 ) {
         int tkl;
         keyStr[5] = toupper(menu->key[item]);
-        tkl = XTextWidth(XQueryFont(display, font_b), keyStr, 6);
+        tkl = XTextWidth(__find_font(font_b), keyStr, 6);
         _draw_string(menu->width-tkl-6, v, font_b, keyStr);
     }
 }
@@ -1507,7 +1538,7 @@ static int _check_track_menu()
 void _add_menu_item(Menu *menu, const char *item, int enabled, char key)
 {
     static char keyStr[8] = " Ctrl+_";
-    int sl = XTextWidth(XQueryFont(display, font_b), item, strlen(item)) + 20;
+    int sl = XTextWidth(__find_font(font_b), item, strlen(item)) + 20;
     int slen = strlen(item);
 
     menu->items = realloc(menu->items, sizeof(char*)*(menu->nItems+1));
@@ -1523,7 +1554,7 @@ void _add_menu_item(Menu *menu, const char *item, int enabled, char key)
 
     if ( menu->key[menu->nItems] != 0 ) {
         keyStr[6] = menu->key[menu->nItems];
-        sl += XTextWidth(XQueryFont(display, font_b), keyStr, 7);
+        sl += XTextWidth(__find_font(font_b), keyStr, 7);
     }
     if ( sl > menu->width ) menu->width = sl;
 
@@ -1578,7 +1609,7 @@ Menu *_new_menu(const char *title)
     menu->win = _window;
     menu->nItems = 0;
 
-    menu->tsize = XTextWidth(XQueryFont(display, font_b), title, strlen(title)) + 12;
+    menu->tsize = XTextWidth(__find_font(font_b), title, strlen(title)) + 12;
 
     _add_menu_item(menu, title, True, 0);
     return menu;
@@ -1702,12 +1733,44 @@ unsigned long int MakeColour(int red, int green, int blue)
 }
 
 /******************************************************************************/
-int InitUI(int *width, int *height)
+static int __n_fonts_ = 0, __max_fonts_ = 128;
+static XFontStruct *__font_list_[128];
+static void __add_font(XFontStruct *fs)
 {
-    char AboutMnu[128];
-    char *mnuTitle = NULL;
+    int i;
+    if ( __n_fonts_ >= __max_fonts_ ) return;
+    if ( __n_fonts_ == 0 ) {
+        for (i = 0; i < __max_fonts_; i++) __font_list_[i] = NULL;
+    }
+    for (i = 0; i < __n_fonts_; i++) {
+        if ( fs == __font_list_[i] ) return;
+    }
+    __font_list_[__n_fonts_++] = fs;
+}
+static void __free_fonts(void)
+{
+    int i;
+    for (i = 0; i < __n_fonts_; i++) {
+        XFreeFont(display, __font_list_[i]);
+        __font_list_[i] = NULL;
+    }
+    __n_fonts_ = 0;
+}
+static XFontStruct *__find_font(Font f)
+{
+    int i;
+    for (i = 0; i < __n_fonts_; i++) {
+        if (__font_list_[i]->fid == f) return __font_list_[i];
+    }
+    return NULL;
+}
 
-#if 1
+/*----------------------------------------------------------------------------*/
+static int _init_X()
+{
+    XFontStruct *fs;
+    if ( display != NULL ) return 0;
+
     display = XOpenDisplay(NULL);  /* open the default display */
     if ( display == NULL ) {
         fprintf(stderr, "Cannot open default display\n");
@@ -1732,16 +1795,36 @@ int InitUI(int *width, int *height)
     Blue  = MakeColour(0, 0, 255);
 
     /* get fonts */
-    if ( (font_f = XLoadFont(display, FONT_F)) == 0 ) {
+    if ( (fs = XLoadQueryFont(display, FONT_F)) == 0 ) {
         fprintf(stderr, "Cannot allocate fixed font\n");
         exit(1);
+    } else {
+        font_f = fs->fid;
+        __add_font(fs);
     }
-    if ( (font_r = XLoadFont(display, FONT_R)) == 0 )
+    if ( (fs = XLoadQueryFont(display, FONT_R)) == 0 )
         font_r = font_f;
-    if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
+    else {
+        font_r = fs->fid;
+        __add_font(fs);
+    }
+    if ( (fs = XLoadQueryFont(display, FONT_B)) == 0 )
         font_b = font_f;
+    else {
+        font_b = fs->fid;
+        __add_font(fs);
+    }
 
-#endif
+    return 0;
+}
+
+/******************************************************************************/
+int InitUI(int *width, int *height)
+{
+    char AboutMnu[128];
+    char *mnuTitle = NULL;
+
+    if ( _init_X() != 0 ) return -1;
 
     if (  *width+30 > dwidth )  *width  = dwidth - 30;
     if ( *height+80 > dheight ) *height = dheight - 80;
@@ -1754,6 +1837,7 @@ int InitUI(int *width, int *height)
     else
         mnuTitle = strdup(progname);
     mnuTitle[0] = toupper(mnuTitle[0]);
+
 //  create_menu("File", "Quit");
     if (short_progname != NULL) {
         snprintf(AboutMnu, 126, "About %s;(-;Quit/q", short_progname);
@@ -1761,6 +1845,7 @@ int InitUI(int *width, int *height)
     } else
         create_menu(mnuTitle, "About;(-;Quit/q");
     free(mnuTitle);
+
     return 0;
 }
 
@@ -1769,15 +1854,18 @@ int InitUI(int *width, int *height)
  ******************************************************************************/
 int CleanupUI()
 {
-    if ( _window == 0L ) return -1;
-
-    _delete_window(_window);
-
-    if ( font_r != font_f ) XUnloadFont(display, font_r);
-    if ( font_b != font_f ) XUnloadFont(display, font_b);
-    XUnloadFont(display, font_f);
+    if ( _window != 0L )
+        _delete_window(_window);
     _window = 0L;
-    XCloseDisplay(display);
+
+    __free_fonts();
+
+    if (_gc != 0L) XFreeGC(display, _gc);
+    _gc = 0L;
+
+    if (display != NULL) XCloseDisplay(display);
+    display = NULL;
+
     return 0;
 }
 
@@ -1933,7 +2021,7 @@ FILE *reopen_log(FILE *l)
 /******************************************************************************/
 int main(int argc, const char *argv[])
 {
-    int i, xargc = 0;
+    int i, xargc = 0, ret = 0;
     const char **xargv = NULL;
     char *cwd = NULL, *d = NULL, *f;
 //  FILE *l = fopen(TLOG_NAME, "w");
@@ -1967,42 +2055,17 @@ int main(int argc, const char *argv[])
 //  for (i = 0; i < xargc; i++)
 //      fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
 
-#if 1
-    display = XOpenDisplay(NULL);  /* open the default display */
-    if ( display == NULL ) {
-        xargv = add_arg(&xargc, xargv, "--no-gui");
-        fprintf(stderr, "Cannot open default display\n");
-//      return -1;
-    } else {
-        screen = DefaultScreen(display);
-        visual = DefaultVisual(display, screen);
-        dwidth = DisplayWidth(display, screen);
-        dheight = DisplayHeight(display, screen);
+    display = NULL;
+    _init_X();
 
-        /* get colours, probably better to get named colours, using this only
-         * if that failed */
-        Black = BlackPixel(display, screen);
-        White = WhitePixel(display, screen);
+    ret = _main_(xargc, xargv);
 
-        cmap = DefaultColormap(display, screen);
+    /* This is not really needed since we are about to exit which will *
+     * clean up memory anyway, but it is better if we're debugging     *
+     * memory leaks                                                    */
+    for (i = 0; i < xargc; i++) free((void*)(xargv[i]));
+    free(xargv);
+    if (progname != NULL) free(progname);
 
-        LightGrey = MakeColour(200, 200, 206);
-        Grey = MakeColour(128, 128, 134);
-        Red = MakeColour(255, 0, 0);
-        Green = MakeColour(0, 255, 0);
-        Blue = MakeColour(0, 0, 255);
-
-        /* get fonts */
-        if ( (font_f = XLoadFont(display, FONT_F)) == 0 ) {
-            fprintf(stderr, "Cannot allocate fixed font\n");
-            exit(1);
-        }
-        if ( (font_r = XLoadFont(display, FONT_R)) == 0 )
-            font_r = font_f;
-        if ( (font_b = XLoadFont(display, FONT_B)) == 0 )
-            font_b = font_f;
-    }
-#endif
-
-    return _main_(xargc, xargv);
+    return ret;
 }

@@ -1113,11 +1113,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(nCmdShow);
 
     char **argv = NULL;
-    int argc = 0;
+    int argc = 0, ret = 0;
 //  GetTempPathA(1024, TLOG_NAME);
 //  strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
 
-//  int i;
+    int i;
 //  FILE *l = fopen(TLOG_NAME, "w");
 //  setvbuf(l, NULL, _IONBF, 0);
 
@@ -1175,7 +1175,12 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     return (int)msg.wParam;
 #endif
 
-    return _main_(argc, (const char **)argv);
+    ret = _main_(argc, (const char **)argv);
+
+    for (i = 0; i < argc; i++) free((void*)(argv[i]));
+    free(progname);
+
+    return ret;
 }
 
 int main(int argc, const char *argv[])

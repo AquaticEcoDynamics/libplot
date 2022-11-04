@@ -95,7 +95,7 @@ static int title_size = 40;
 static int tfu = 0, tfd = 0, lfu = 0, lfd = 0;
 static char *label_font = NULL;
 static int label_size = 16;
-char *progname = "Plot Window";
+char *progname = NULL;
 char *short_progname = NULL, *about_message = NULL;
 
 
@@ -144,11 +144,15 @@ void set_progname_(const char *n, int *len)
     char *s = malloc(*len+1);
     strncpy(s, n, *len);
     s[*len] = 0;
+    if (progname != NULL) free(progname);
     progname = s;
 }
 /*----------------------------------------------------------------------------*/
 void set_progname(const char *name)
-{ progname = strdup(name); }
+{
+    if (progname != NULL) free(progname);
+    progname = strdup(name);
+}
 /*----------------------------------------------------------------------------*/
 
 /******************************************************************************/
@@ -189,6 +193,7 @@ void init_plotter_no_gui()
     ctime_r(&t, buf);
     printf("Started  @ %s\n", buf);
 */
+    if (progname == NULL) progname = strdup("Plot Window");
     _plots = malloc(max_plots*sizeof(Plot));
     memset(_plots, 0, max_plots*sizeof(Plot));
 }

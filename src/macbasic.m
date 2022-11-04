@@ -770,7 +770,7 @@ FILE *reopen_log(FILE *l)
 int main(int argc, const char *argv[])
 {
     Controller *controller;
-    int i, xargc = 0;
+    int i, xargc = 0, ret = 0;
     const char **xargv = NULL;
     int havx = 0;
 //  FILE *l = fopen(TLOG_NAME, "w");
@@ -853,5 +853,8 @@ int main(int argc, const char *argv[])
 //  l = reopen_log(l);
 
     /*------------------------------------------------------------------------*/
-    return _main_(xargc, xargv);
+    ret = _main_(xargc, xargv);
+    for (i = 0; i < xargc; i++) free((void*)(xargv[i]));
+    free(progname);
+    return ret;
 }
