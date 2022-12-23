@@ -34,6 +34,10 @@ else
   OSTYPE=$(shell uname -o)
 endif
 
+ifeq ($(MDEBUG),true)
+  DEBUG=true
+endif
+
 srcdir=src
 incdir=include
 INCLUDES=-I${incdir} -I.
@@ -55,6 +59,12 @@ else ifeq ($(OSTYPE),Msys)
 else
   uibasic=xbasic
   srcext=c
+endif
+ifeq ($(MDEBUG),true)
+  CFLAGS+=-fsanitize=address
+endif
+ifeq ($(DEBUG),true)
+  CFLAGS+=-g
 endif
 
 ifeq ($(SINGLE),true)
