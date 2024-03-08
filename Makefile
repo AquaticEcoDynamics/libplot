@@ -92,8 +92,8 @@ ifeq ($(WITH_XPLOTS),true)
 endif
 
 ifeq ($(OSTYPE),Darwin)
-  INCLUDES+=-I/opt/local/include
-  LIBS+=-framework Cocoa -L/opt/local/lib
+  INCLUDES+=-I/opt/local/include -I/usr/local/include -I/opt/homebrew/include
+  LIBS+=-framework Cocoa -L/opt/local/lib -L/usr/local/lib -L/opt/homebrew/lib
 else ifneq ($(OSTYPE),Msys)
   INCLUDES+=-I/usr/local/include
   LIBS+=-lX11
