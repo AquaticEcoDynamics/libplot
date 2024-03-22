@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2018 -  The University of Western Australia               *
+ * Copyright 2013 - 2024 -  The University of Western Australia               *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -38,7 +38,7 @@ typedef struct _rgb {
     int col;
     unsigned long int xcolour;
     int count;
-    } rgb_val;
+} rgb_val;
 
 extern rgb_val _map[256];
 
