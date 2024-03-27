@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.1.2"
+#define LIB_PLOT_VERSION "1.1.2a"
 
 #define PF_TITLE  1
 #define PF_LABEL  2

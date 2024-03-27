@@ -1130,9 +1130,7 @@ static void _dialog_key(Window win, char key)
             XClearArea(display, win, left, top, right-left, bottom-top, False);
         }
     } else {
-        if ( (item->data = realloc(name_buf, len+10)) == NULL )
-            item->data = name_buf;
-        else
+        if ( (item->data = realloc(name_buf, len+10)) != NULL )
             name_buf = item->data;
         name_buf[len] = key; name_buf[len+1] = 0;
         _draw_string(left, bottom-5, font_r, &name_buf[len]);
