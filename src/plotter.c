@@ -480,11 +480,14 @@ void set_plot_y_label_(int *plot, const char *label, int *sl)
 void set_plot_y_label(int plot, const char *label)
 {
     if ( plot < 0 ) return;
-    _plots[plot].havey = 1;
+    if ( !_plots[plot].havey ) _plots[plot].havey = 1;
     _plots[plot].yname = strdup(label);
 }
 
 
+/******************************************************************************/
+int add_plot_subplot_y_(int *plot)
+{ return add_plot_subplot_y(*plot); }
 /*----------------------------------------------------------------------------*/
 int add_plot_subplot_y(int plot)
 {
@@ -595,7 +598,7 @@ void set_plot_y_limits(int plot, double min, double max)
     _plots[plot].ymin = min;
     _plots[plot].ymax = max;
     _plots[plot].yscale = _plots[plot].maxy / (max - min);
-    _plots[plot].havey = 1;
+    if ( !_plots[plot].havey ) _plots[plot].havey = 1;
 #if DEBUG
     fprintf(stderr, "plot %d ymin %8.2lf ymax %8.2lf yscale %8.2lf\n", plot,
                   _plots[plot].ymin, _plots[plot].ymax, _plots[plot].yscale);
@@ -723,6 +726,8 @@ void set_plot_version(int plot, const char *version)
                                                (unsigned char *)version, grey);
 }
 /*----------------------------------------------------------------------------*/
+void set_plot_varname_(int *plot, const char *varname, int *len)
+{ char *s = strndup(varname, *len); set_plot_varname(*plot, s); free(s); }
 void set_plot_varname(int plot, const char *varname)
 {
     size_t w;
@@ -778,8 +783,10 @@ void plot_value(int plot, double x, double y, double z)
         subplot = zi;
         if ( zi == 0 )
             colour = black;
-        else
+        else if ( _plots[plot].havey > 1 )
             colour = z * (256 / (_plots[plot].havey-1));
+        else
+            colour = grey;
         z = y;
     }
     if ( _plots[plot].zinit ) {
