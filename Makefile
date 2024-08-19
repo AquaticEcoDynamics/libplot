@@ -75,10 +75,6 @@ else
   TARGET=lib/libplot.a
 endif
 
-SRCS=${srcdir}/${uibasic}.${srcext} \
-     ${srcdir}/colours.c \
-     ${srcdir}/plotter.c
-
 OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
      ${objdir}/plotter.o
@@ -102,9 +98,8 @@ else
   LIBS+=-L../ancillary/windows/msys/include -I../win
 endif
 
-ifeq ($(SINGLE),true)
-  CFLAGS += -DSINGLE=1
-endif
+# if we are building static lib...
+CFLAGS+=-fPIE
 
 all: ${TARGET}
 
@@ -130,10 +125,10 @@ ${objdir}:
 	@mkdir ${objdir}
 
 ${objdir}/%.o: ${srcdir}/%.c ${incdir}/%.h
-	$(CC) -Wall -fPIC $(CFLAGS) $(INCLUDES) -g -c $< -o $@
+	$(CC) -Wall $(CFLAGS) $(INCLUDES) -g -c $< -o $@
 
 ${objdir}/${uibasic}.o: ${srcdir}/${uibasic}.${srcext}
-	$(CC) -Wall -fPIC $(CFLAGS) $(INCLUDES) -g -c $< -o $@
+	$(CC) -Wall $(CFLAGS) $(INCLUDES) -g -c $< -o $@
 
 tstmap: tests/tstmap.c ${TARGET}
 	$(CC) -DTRUE_COLOUR=1 $(CFLAGS) $(INCLUDES) tests/tstmap.c ${TARGET} $(LIBS) -o $@
