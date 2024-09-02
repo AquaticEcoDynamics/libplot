@@ -522,8 +522,9 @@ void show_l_line(int plot, AED_REAL y)
     int ypos;
     ypos = _plots[plot].maxy - ((y - _plots[plot].ymin) * _plots[plot].yscale);
 
-    gdImageLine(_plots[plot].im, _plots[plot].xposp+2, ypos+20,
-                                 _plots[plot].xposp+7, ypos+20, red);
+    if ( _plots[plot].im != NULL )
+        gdImageLine(_plots[plot].im, _plots[plot].xposp+2, ypos+20,
+                                     _plots[plot].xposp+7, ypos+20, red);
 }
 /******************************************************************************/
 void show_h_line(int plot, AED_REAL y)
@@ -531,8 +532,9 @@ void show_h_line(int plot, AED_REAL y)
     int ypos;
     ypos = _plots[plot].maxy - ((y - _plots[plot].ymin) * _plots[plot].yscale);
 
-    gdImageLine(_plots[plot].im,                   19, ypos+20,
-                                 _plots[plot].maxx+23, ypos+20, grey);
+    if ( _plots[plot].im != NULL )
+        gdImageLine(_plots[plot].im,                   19, ypos+20,
+                                     _plots[plot].maxx+23, ypos+20, grey);
 }
 
 
@@ -753,6 +755,8 @@ void plot_value(int plot, double x, double y, double z)
     int subplot = 0;
 
     if ( plot < 0 ) return;
+    if ( plot >= max_plots )
+        return;
 
 #if DEBUG
     if ( plot == 0 )
