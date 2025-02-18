@@ -7,7 +7,7 @@
 #      School of Agriculture and Environment                                  #
 #      The University of Western Australia                                    #
 #                                                                             #
-#  Copyright 2013 - 2024 -  The University of Western Australia               #
+#  Copyright 2013 - 2025 -  The University of Western Australia               #
 #                                                                             #
 #   libplot is free software: you can redistribute it and/or modify           #
 #   it under the terms of the GNU General Public License as published by      #
@@ -94,8 +94,8 @@ else ifneq ($(OSTYPE),Msys)
   INCLUDES+=-I/usr/local/include
   LIBS+=-lX11
 else
-  INCLUDES+=-I../ancillary/windows/msys/include -I../win
-  LIBS+=-L../ancillary/windows/msys/include -I../win
+  INCLUDES+=-I../ancillary/windows/include -I../win
+  LIBS+=-L../ancillary/windows/include -I../win
 endif
 
 # if we are building static lib...
