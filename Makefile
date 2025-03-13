@@ -67,13 +67,8 @@ ifeq ($(DEBUG),true)
   CFLAGS+=-g
 endif
 
-ifeq ($(SINGLE),true)
-  objdir=obj_s
-  TARGET=lib/libplot_s.a
-else
-  objdir=obj
-  TARGET=lib/libplot.a
-endif
+objdir=obj
+TARGET=lib/libplot.a
 
 OBJS=${objdir}/${uibasic}.o \
      ${objdir}/colours.o \
