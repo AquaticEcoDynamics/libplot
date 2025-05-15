@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2024 -  The University of Western Australia               *
+ * Copyright 2013 - 2025 -  The University of Western Australia               *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -251,10 +251,10 @@ void drawText(gdImagePtr im, int left, int right, int top, int bottom,
     int brect[8];
 
 #if DEBUG
-    gdImageLine(im, left, top,    right, top,    red);
-    gdImageLine(im, left, bottom, right, bottom, red);
-    gdImageLine(im, left,  top, left,  bottom, red);
-    gdImageLine(im, right, top, right, bottom, red);
+    gdImageLine(im, left,  top,    right, top,    red);
+    gdImageLine(im, left,  bottom, right, bottom, red);
+    gdImageLine(im, left,  top,    left,  bottom, red);
+    gdImageLine(im, right, top,    right, bottom, red);
 #endif
 
     if ( flags & IS_TITLE ) {
@@ -418,6 +418,11 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
     last_plot++;
     if ( last_plot >= max_plots ) return -1;
 
+#if DEBUG
+    fprintf(stderr, "create_plot posx %d , posy %d, maxx %d, maxy %d, title %s\n",
+                                                  posx, posy, maxx, maxy, title);
+#endif
+
     mx = maxx+80; my = maxy+60;
     im = gdImageCreate(mx, my);
     make_colour_map(im, 1); // this is an attempt at what MatLab calls "Jet"
@@ -548,16 +553,16 @@ void set_plot_x_limits(int plot, double min, double max)
     int y,m,d;
     char *xname;
 
-    if ( plot < 0 ) return;
+    if ( plot < 0 || plot >= max_plots ) return;
 
     _plots[plot].xmin = min;
     _plots[plot].xmax = max;
     _plots[plot].xscale = _plots[plot].maxx / (max - min);
     _plots[plot].havex = 1;
 #if DEBUG
-//  if ( plot == 1 )
-    fprintf(stderr, "plot %d xmin %8.2lf xmax %8.2lf xscale %8.2lf\n", plot,
-                  _plots[plot].xmin, _plots[plot].xmax, _plots[plot].xscale);
+    if ( plot == 1 )
+    fprintf(stderr, "plot %d xmin %8.2lf xmax %8.2lf xscale %8.2lf [%s]\n", plot,
+                  _plots[plot].xmin, _plots[plot].xmax, _plots[plot].xscale, _plots[plot].xname);
 #endif
     gdImageLine(_plots[plot].im,            19, _plots[plot].maxy+21,
                           _plots[plot].maxx+21, _plots[plot].maxy+21, black);
@@ -595,13 +600,14 @@ void set_plot_y_limits(int plot, double min, double max)
     double yabs;
     char *yname = NULL;
 
-    if ( plot < 0 ) return;
+    if ( plot < 0 || plot >= max_plots ) return;
 
     _plots[plot].ymin = min;
     _plots[plot].ymax = max;
     _plots[plot].yscale = _plots[plot].maxy / (max - min);
     if ( !_plots[plot].havey ) _plots[plot].havey = 1;
 #if DEBUG
+    if ( plot == 1 )
     fprintf(stderr, "plot %d ymin %8.2lf ymax %8.2lf yscale %8.2lf\n", plot,
                   _plots[plot].ymin, _plots[plot].ymax, _plots[plot].yscale);
 #endif
@@ -650,13 +656,14 @@ void set_plot_z_limits(int plot, double min, double max)
     double zabs;
 //  char *zname = NULL;
 
-    if ( plot < 0 ) return;
+    if ( plot < 0 || plot >= max_plots ) return;
 
     _plots[plot].zmin = min;
     _plots[plot].zmax = max;
     _plots[plot].zscale = MAX_COL_VAL / (max - min);
     _plots[plot].havez = 1;
 #if DEBUG
+    if ( plot == 1 )
     fprintf(stderr, "plot %d zmin %8.2lf zmax %8.2lf zscale %8.2lf\n", plot,
                   _plots[plot].zmin, _plots[plot].zmax, _plots[plot].zscale);
 #endif
@@ -754,9 +761,7 @@ void plot_value(int plot, double x, double y, double z)
     int colour=0, xpos, xposp, ypos;
     int subplot = 0;
 
-    if ( plot < 0 ) return;
-    if ( plot >= max_plots )
-        return;
+    if ( plot < 0 || plot >= max_plots ) return;
 
 #if DEBUG
     if ( plot == 0 )
@@ -964,12 +969,12 @@ void do_cleanup(int saveall)
 */
     for (i = 0; i <= last_plot; i++) {
         if ( _plots[i].havez )
-            printf("plot %d : zmin = %8.2le ; zmax = %8.2le (supplied %8.2le ; %8.2le) %s\n",
+            printf("plot %d : zmin = %12.3le ; zmax = %12.3le (supplied %12.3le ; %12.3le) %s\n",
                                    i, _plots[i].zzmin, _plots[i].zzmax,
                                       _plots[i].zmin,  _plots[i].zmax,
                                       _plots[i].title);
         else
-            printf("plot %d : ymin = %8.2le ; ymax = %8.2le (supplied %8.2le ; %8.2le) %s\n",
+            printf("plot %d : ymin = %12.3le ; ymax = %12.3le (supplied %12.3le ; %12.3le) %s\n",
                                    i, _plots[i].zzmin, _plots[i].zzmax,
                                       _plots[i].ymin,  _plots[i].ymax,
                                       _plots[i].title);
