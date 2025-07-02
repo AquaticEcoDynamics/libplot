@@ -184,6 +184,7 @@ void set_aboutmessage(const char *name)
 static int _s_maxx = 0;
 /******************************************************************************/
 int init_plotter_(int *maxx, int *maxy) { return init_plotter(maxx, maxy); }
+int init_plotter_no_gui_() { init_plotter_no_gui(); return 0; }
 /*----------------------------------------------------------------------------*/
 void init_plotter_no_gui()
 {

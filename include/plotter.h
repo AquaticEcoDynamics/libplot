@@ -29,7 +29,7 @@
 #ifndef _PLOTTER_H_
 #define _PLOTTER_H_
 
-#define MAX_PLOTS  16
+#define MAX_PLOTS  32
 
 /* the C prototypes */
 int init_plotter(int *maxx, int *maxy);
