@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2024 -  The University of Western Australia               *
+ * Copyright 2013 - 2025 -  The University of Western Australia               *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -42,6 +42,7 @@ void set_plot_y_limits(int plot, double min, double max);
 void set_plot_z_limits(int plot, double min, double max);
 void set_plot_version(int plot, const char *vers);
 void set_plot_varname(int plot, const char *varname);
+void set_plot_animation(int plots, const char *anim_name);
 void plot_value(int plot, double x, double y, double z);
 void flush_plot(int plot);
 void do_cleanup(int saveall);

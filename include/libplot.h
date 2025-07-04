@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2024 -  The University of Western Australia               *
+ * Copyright 2013 - 2025 -  The University of Western Australia               *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.1.3"
+#define LIB_PLOT_VERSION "1.1.4"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -146,6 +146,7 @@
    void set_plot_z_limits(int plot, double min, double max);
    void set_plot_version(int plot, const char *version);
    void set_plot_varname(int plot, const char *varname);
+   void set_plot_animate(int plot, const char *anim_name);
    void set_plot_x_step(int plot, AED_REAL xstep);
    void set_plot_y_step(int plot, AED_REAL ystep);
    void set_plot_z_step(int plot, AED_REAL zstep);

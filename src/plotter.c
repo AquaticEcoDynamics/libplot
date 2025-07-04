@@ -81,6 +81,8 @@ typedef struct _plot_ {
     int    zinit;
     int   *data;
     const char *version;
+    FILE *ag;
+    gdImagePtr tim;
 } Plot;
 
 static int max_plots = MAX_PLOTS;
@@ -97,6 +99,8 @@ static char *label_font = NULL;
 static int label_size = 16;
 char *progname = NULL;
 char *short_progname = NULL, *about_message = NULL;
+
+int anim_delay = 0;
 
 
 /******************************************************************************/
@@ -426,6 +430,8 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
 
     mx = maxx+80; my = maxy+60;
     im = gdImageCreate(mx, my);
+    (void)gdImageColorAllocate(im, 255, 255, 255);
+    gdImageColorTransparent(im, gdImageColorAllocate(im, 1, 1, 1));
     make_colour_map(im, 1); // this is an attempt at what MatLab calls "Jet"
 
     ShowColourMapV(im, mx-46, 5);
@@ -751,6 +757,16 @@ void set_plot_varname(int plot, const char *varname)
 
 
 /******************************************************************************/
+void set_plot_animation(int plot, const char *anim_name)
+{
+    _plots[plot].ag = fopen(anim_name, "wb");
+    gdImageGifAnimBegin(_plots[plot].im, _plots[plot].ag, 1, 0);
+    // save initial frame
+    gdImageGifAnimAdd(_plots[plot].im, _plots[plot].ag, 0, 0, 0, anim_delay, gdDisposalNone, NULL);
+    _plots[plot].tim = gdImageClone(_plots[plot].im);
+}
+
+/******************************************************************************/
 void x_plot_value_(int *plot, int *x, AED_REAL *y, AED_REAL *z)
 { plot_value(*plot, *x, *y, *z); }
 /*----------------------------------------------------------------------------*/
@@ -861,10 +877,20 @@ void flush_all_plots()
 {
     int plot;
 
-    for (plot = 0; plot <= last_plot; plot++)
+    for (plot = 0; plot <= last_plot; plot++) {
         FlushPicture(_plots[plot].im, _plots[plot].item_id);
+
+        if (_plots[plot].ag != NULL) {
+            // save next frame
+            gdImageGifAnimAdd(_plots[plot].im, _plots[plot].ag, 0, 0, 0,
+                   anim_delay, gdDisposalRestoreBackground, _plots[plot].tim);
+            if ( _plots[plot].tim != NULL ) gdImageDestroy(_plots[plot].tim);
+            _plots[plot].tim = gdImageClone(_plots[plot].im);
+        }
+    }
     CheckUI();
 }
+
 
 /******************************************************************************/
 void flush_plot_(int *plot) { flush_plot(*plot); }
@@ -969,6 +995,8 @@ void do_cleanup(int saveall)
     printf("Finished @ %s\n", buf);
 */
     for (i = 0; i <= last_plot; i++) {
+        if ( _plots[i].ag != NULL ) fclose(_plots[i].ag);
+
         if ( _plots[i].havez )
             printf("plot %d : zmin = %12.3le ; zmax = %12.3le (supplied %12.3le ; %12.3le) %s\n",
                                    i, _plots[i].zzmin, _plots[i].zzmax,
