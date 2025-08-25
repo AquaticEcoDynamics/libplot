@@ -9,7 +9,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013-2025 -  The University of Western Australia                 *
+ * Copyright 2013-2025 - The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -1963,6 +1963,7 @@ void capitalise(char *s)
 }
 
 /******************************************************************************/
+#if 0
 static const char** add_arg(int *argc, const char**xargv, const char *argv)
 {
     int c = *argc;
@@ -1971,6 +1972,7 @@ static const char** add_arg(int *argc, const char**xargv, const char *argv)
     *argc = c;
     return xargv;
 }
+#endif
 
 #if 0
 #define TLOG_NAME "/tmp/STD_LOG.txt"
@@ -2016,6 +2018,17 @@ FILE *reopen_log(FILE *l)
 }
 #endif
 
+/******************************************************************************/
+void init_plotter_main(const char *argv0)
+{
+    progname = strdup(basename((char*)argv0));
+    capitalise(progname);
+
+    display = NULL;
+    _init_X();
+}
+
+#if 0
 /******************************************************************************/
 int main(int argc, const char *argv[])
 {
@@ -2067,3 +2080,4 @@ int main(int argc, const char *argv[])
 
     return ret;
 }
+#endif

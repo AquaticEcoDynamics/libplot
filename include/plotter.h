@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2025 -  The University of Western Australia               *
+ * Copyright 2013-2025 - The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -32,11 +32,12 @@
 #define MAX_PLOTS  32
 
 /* the C prototypes */
+void init_plotter_main(const char *name);
 int init_plotter(int *maxx, int *maxy);
 int init_plotter_max(int maxplots, int *maxx, int *maxy);
 int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
 int add_plot_subplot_y(int plot);
-void show_h_line(int plot, AED_REAL y);
+void show_h_line(int plot, double y);
 void set_plot_x_limits(int plot, double min, double max);
 void set_plot_y_limits(int plot, double min, double max);
 void set_plot_z_limits(int plot, double min, double max);

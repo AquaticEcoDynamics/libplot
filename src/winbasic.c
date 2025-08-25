@@ -1103,6 +1103,15 @@ FILE *reopen_log(FILE *l)
 #endif
 
 /******************************************************************************/
+void init_plotter_main(const char *argv0)
+{
+    progname = strdup(basename((char*)argv0));
+    capitalise(progname);
+}
+
+
+#if 0
+/******************************************************************************/
 int APIENTRY WinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPSTR     lpCmdLine,
@@ -1175,14 +1184,20 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     return (int)msg.wParam;
 #endif
 
+#if 0
     ret = _main_(argc, (const char **)argv);
+#else
+    ret = main(argc, (const char **)argv);
+#endif
 
     for (i = 0; i < argc; i++) free((void*)(argv[i]));
     free(progname);
 
     return ret;
 }
+#endif
 
+#if 0
 int main(int argc, const char *argv[])
 {
     // extract and capitalise the program name
@@ -1191,3 +1206,4 @@ int main(int argc, const char *argv[])
 
     return _main_(argc, argv);
 }
+#endif

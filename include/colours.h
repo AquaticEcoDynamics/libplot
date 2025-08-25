@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2025 -  The University of Western Australia               *
+ * Copyright 2013-2025 - The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -25,7 +25,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.     *
  *                                                                            *
  ******************************************************************************/
-
 #ifndef _COLOURS_H_
 #define _COLOURS_H_
 

@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013 - 2025 -  The University of Western Australia               *
+ * Copyright 2013-2025 - The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -109,16 +109,16 @@ int anim_delay = 0;
 int init_plotter_(int *maxx, int *maxy);
 /* the final int is the length of the title string that fortran adds */
 int create_plot_(int *posx, int *posy, int *maxx, int *maxy, const char *title, int *sl);
-void set_plot_x_limits_(int *plot, AED_REAL *min, AED_REAL *max);
-void set_plot_y_limits_(int *plot, AED_REAL *min, AED_REAL *max);
-void set_plot_z_limits_(int *plot, AED_REAL *min, AED_REAL *max);
-void plot_value_(int *plot, AED_REAL *x, AED_REAL *y, AED_REAL *z);
+void set_plot_x_limits_(int *plot, PLT_REAL *min, PLT_REAL *max);
+void set_plot_y_limits_(int *plot, PLT_REAL *min, PLT_REAL *max);
+void set_plot_z_limits_(int *plot, PLT_REAL *min, PLT_REAL *max);
+void plot_value_(int *plot, PLT_REAL *x, PLT_REAL *y, PLT_REAL *z);
 void save_plot_(int *plot);
 void flush_plot_(int *plot);
 void do_cleanup_(int *saveall);
-void set_plot_x_step_(int *plot, AED_REAL *xstep);
-void set_plot_y_step_(int *plot, AED_REAL *ystep);
-void set_plot_z_step_(int *plot, AED_REAL *zstep);
+void set_plot_x_step_(int *plot, PLT_REAL *xstep);
+void set_plot_y_step_(int *plot, PLT_REAL *ystep);
+void set_plot_z_step_(int *plot, PLT_REAL *zstep);
 
 /******************************************************************************/
 static void calendar_date(int julian, int *yyyy, int *mm, int *dd);
@@ -529,7 +529,7 @@ void set_plot_z_label(int plot, const char *label)
 
 
 /******************************************************************************/
-void show_l_line(int plot, AED_REAL y)
+void show_l_line(int plot, PLT_REAL y)
 {
     int ypos;
     ypos = _plots[plot].maxy - ((y - _plots[plot].ymin) * _plots[plot].yscale);
@@ -539,7 +539,7 @@ void show_l_line(int plot, AED_REAL y)
                                      _plots[plot].xposp+7, ypos+20, red);
 }
 /******************************************************************************/
-void show_h_line(int plot, AED_REAL y)
+void show_h_line(int plot, PLT_REAL y)
 {
     int ypos;
     ypos = _plots[plot].maxy - ((y - _plots[plot].ymin) * _plots[plot].yscale);
@@ -551,7 +551,7 @@ void show_h_line(int plot, AED_REAL y)
 
 
 /******************************************************************************/
-void set_plot_x_limits_(int *plot, AED_REAL *min, AED_REAL *max)
+void set_plot_x_limits_(int *plot, PLT_REAL *min, PLT_REAL *max)
 { set_plot_x_limits(*plot, *min, *max); }
 /*----------------------------------------------------------------------------*/
 void set_plot_x_limits(int plot, double min, double max)
@@ -598,7 +598,7 @@ void set_plot_x_limits(int plot, double min, double max)
 
 
 /******************************************************************************/
-void set_plot_y_limits_(int *plot, AED_REAL *min, AED_REAL *max)
+void set_plot_y_limits_(int *plot, PLT_REAL *min, PLT_REAL *max)
 { set_plot_y_limits(*plot, *min, *max); }
 /*----------------------------------------------------------------------------*/
 void set_plot_y_limits(int plot, double min, double max)
@@ -654,7 +654,7 @@ void set_plot_y_limits(int plot, double min, double max)
 
 
 /******************************************************************************/
-void set_plot_z_limits_(int *plot, AED_REAL *min, AED_REAL *max)
+void set_plot_z_limits_(int *plot, PLT_REAL *min, PLT_REAL *max)
 { set_plot_z_limits(*plot, *min, *max); }
 /*----------------------------------------------------------------------------*/
 void set_plot_z_limits(int plot, double min, double max)
@@ -712,22 +712,22 @@ void set_plot_z_limits(int plot, double min, double max)
 
 
 /******************************************************************************/
-void set_plot_x_step_(int *plot, AED_REAL *xstep)
+void set_plot_x_step_(int *plot, PLT_REAL *xstep)
 { set_plot_x_step(*plot, *xstep); }
 /*----------------------------------------------------------------------------*/
-void set_plot_x_step(int plot, AED_REAL xstep)
+void set_plot_x_step(int plot, PLT_REAL xstep)
 { _plots[plot].xstep = xstep * _plots[plot].xscale; }
 /******************************************************************************/
-void set_plot_y_step_(int *plot, AED_REAL *ystep)
+void set_plot_y_step_(int *plot, PLT_REAL *ystep)
 { set_plot_y_step(*plot, *ystep); }
 /*----------------------------------------------------------------------------*/
-void set_plot_y_step(int plot, AED_REAL ystep)
+void set_plot_y_step(int plot, PLT_REAL ystep)
 { _plots[plot].ystep = ystep * _plots[plot].zscale; }
 /******************************************************************************/
-void set_plot_z_step_(int *plot, AED_REAL *zstep)
+void set_plot_z_step_(int *plot, PLT_REAL *zstep)
 { set_plot_z_step(*plot, *zstep); }
 /*----------------------------------------------------------------------------*/
-void set_plot_z_step(int plot, AED_REAL zstep)
+void set_plot_z_step(int plot, PLT_REAL zstep)
 { _plots[plot].zstep = zstep * _plots[plot].zscale; }
 
 
@@ -767,10 +767,10 @@ void set_plot_animation(int plot, const char *anim_name)
 }
 
 /******************************************************************************/
-void x_plot_value_(int *plot, int *x, AED_REAL *y, AED_REAL *z)
+void x_plot_value_(int *plot, int *x, PLT_REAL *y, PLT_REAL *z)
 { plot_value(*plot, *x, *y, *z); }
 /*----------------------------------------------------------------------------*/
-void plot_value_(int *plot, AED_REAL *x, AED_REAL *y, AED_REAL *z)
+void plot_value_(int *plot, PLT_REAL *x, PLT_REAL *y, PLT_REAL *z)
 { plot_value(*plot, *x, *y, *z); }
 /*----------------------------------------------------------------------------*/
 void plot_value(int plot, double x, double y, double z)
@@ -1088,4 +1088,18 @@ static void calendar_date(int julian, int *yyyy, int *mm, int *dd)
     *yyyy = y;
     *mm = m;
     *dd = d;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * for fortran main                                                           *
+ *                                                                            *
+ ******************************************************************************/
+void init_plotter_main_(const char *name, int *len)
+{
+    char *argv0 = malloc((*len)+2);
+    memcpy(argv0, name, *len);
+    argv0[*len]  = 0;
+    init_plotter_main(argv0);
+    free(argv0);
 }
