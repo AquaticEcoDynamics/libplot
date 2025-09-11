@@ -77,7 +77,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>..\..\ancillary\windows\include;..\include;..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_LIB;NONDLL;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;NONDLL;_CRT_SECURE_NO_WARNINGS;__STDC__=1</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <WarningLevel>Level3</WarningLevel>
       <CompileAs>CompileAsC</CompileAs>

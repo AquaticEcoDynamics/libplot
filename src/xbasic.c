@@ -30,7 +30,7 @@
  *                                                                            *
  *  Derived with permission from                                              *
  *                                                                            *
- * Copyright 2003 - Ambinet System                                            *
+ * Copyright 2003 - Ambinet Systems                                           *
  *                                                                            *
  ******************************************************************************/
 

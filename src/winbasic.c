@@ -30,7 +30,7 @@
  *                                                                            *
  *  Derived with permission from                                              *
  *                                                                            *
- * Copyright 2003 - Ambinet System                                            *
+ * Copyright 2003 - Ambinet Systems                                           *
  *                                                                            *
  ******************************************************************************/
 #undef UNICODE
@@ -943,13 +943,13 @@ char *basename(const char *s)
 /*----------------------------------------------------------------------------*/
 int is_plots(const char *fn)
 {
-    struct stat buf;
+    struct _stat buf;
     char *tbuf = NULL;
     FILE *f;
     int ret = 0;
 
     if ( (f = fopen(fn, "r")) != NULL ) {
-        fstat(_fileno(f), &buf);
+        _fstat(_fileno(f), &buf);
         tbuf = malloc(buf.st_size+10);
         fread(tbuf, 1, buf.st_size, f);
         fclose(f);

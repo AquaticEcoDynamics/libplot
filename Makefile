@@ -7,7 +7,7 @@
 #      School of Agriculture and Environment                                  #
 #      The University of Western Australia                                    #
 #                                                                             #
-#  Copyright 2013 - 2025 -  The University of Western Australia               #
+#  Copyright 2013-2025 - The University of Western Australia                  #
 #                                                                             #
 #   libplot is free software: you can redistribute it and/or modify           #
 #   it under the terms of the GNU General Public License as published by      #

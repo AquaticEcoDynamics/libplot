@@ -33,7 +33,44 @@
 #define PF_TITLE  1
 #define PF_LABEL  2
 
-#ifdef _FORTRAN_SOURCE_
+#ifdef __STDC__
+
+   #define PLT_REAL double
+
+   void set_progname(const char *name);
+   void set_shortprogname(const char *name);
+   void set_aboutmessage(const char *name);
+   void init_plotter_main(const char *argv0);
+   void init_plotter_no_gui(void);
+   int init_plotter(int *maxx, int *maxy);
+   int init_plotter_max(int max_plots, int *maxx, int *maxy);
+   void set_plot_font(int which, int size, const char *font);
+   int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
+   int add_plot_subplot_y(int plot);
+   void show_h_line(int plot, PLT_REAL y);
+   void set_plot_x_label(int plot, const char *label);
+   void set_plot_y_label(int plot, const char *label);
+   void set_plot_z_label(int plot, const char *label);
+   void set_plot_x_limits(int plot, double min, double max);
+   void set_plot_y_limits(int plot, double min, double max);
+   void set_plot_z_limits(int plot, double min, double max);
+   void set_plot_version(int plot, const char *version);
+   void set_plot_varname(int plot, const char *varname);
+   void set_plot_animate(int plot, const char *anim_name);
+   void set_plot_x_step(int plot, PLT_REAL xstep);
+   void set_plot_y_step(int plot, PLT_REAL ystep);
+   void set_plot_z_step(int plot, PLT_REAL zstep);
+   void plot_value(int plot, double x, double y, double z);
+#ifdef _WIN32
+   char *ctime_r(const time_t *timep, char *buf);
+#endif
+   void flush_plot(int plot);
+   void flush_all_plots(void);
+   void save_all_plots_named(const char*name);
+   void do_cleanup(int saveall);
+
+#else
+
 # define PLT_REAL double precision
 
   INTERFACE
@@ -119,42 +156,6 @@
         CLOGICAL,INTENT(in) :: saveall
      END SUBROUTINE
   END INTERFACE
-
-#else
-
-   #define PLT_REAL double
-
-   void set_progname(const char *name);
-   void set_shortprogname(const char *name);
-   void set_aboutmessage(const char *name);
-   void init_plotter_main(const char *argv0);
-   void init_plotter_no_gui(void);
-   int init_plotter(int *maxx, int *maxy);
-   int init_plotter_max(int max_plots, int *maxx, int *maxy);
-   void set_plot_font(int which, int size, const char *font);
-   int create_plot(int posx, int posy, int maxx, int maxy, const char *title);
-   int add_plot_subplot_y(int plot);
-   void show_h_line(int plot, PLT_REAL y);
-   void set_plot_x_label(int plot, const char *label);
-   void set_plot_y_label(int plot, const char *label);
-   void set_plot_z_label(int plot, const char *label);
-   void set_plot_x_limits(int plot, double min, double max);
-   void set_plot_y_limits(int plot, double min, double max);
-   void set_plot_z_limits(int plot, double min, double max);
-   void set_plot_version(int plot, const char *version);
-   void set_plot_varname(int plot, const char *varname);
-   void set_plot_animate(int plot, const char *anim_name);
-   void set_plot_x_step(int plot, PLT_REAL xstep);
-   void set_plot_y_step(int plot, PLT_REAL ystep);
-   void set_plot_z_step(int plot, PLT_REAL zstep);
-   void plot_value(int plot, double x, double y, double z);
-#ifdef _WIN32
-   char *ctime_r(const time_t *timep, char *buf);
-#endif
-   void flush_plot(int plot);
-   void flush_all_plots(void);
-   void save_all_plots_named(const char*name);
-   void do_cleanup(int saveall);
 
 #endif
 
