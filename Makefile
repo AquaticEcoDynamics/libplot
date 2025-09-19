@@ -94,7 +94,8 @@ else
 endif
 
 # if we are building static lib...
-CFLAGS+=-fPIE
+#CFLAGS+=-fPIE
+CFLAGS+=-fPIC
 
 all: ${TARGET}
 

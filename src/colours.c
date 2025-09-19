@@ -31,17 +31,6 @@
 
 #include <colours.h>
 
-#if DO_XCMAPS_TOO
-#include <X11/X.h>
-#include <X11/Xlib.h>
-
-/******************************************************************************/
-extern Display *display;
-extern Window window;
-extern GC gc;
-extern int Black;
-#endif
-
 static rgb_val _x_map[2048];
 rgb_val _map[256];
 int black, grey, white, red, green, blue;
@@ -53,10 +42,6 @@ int black, grey, white, red, green, blue;
 void make_colour_map(gdImagePtr im, int style)
 {
     int i=0;
-#if DO_XCMAPS_TOO
-    Colormap cmap = DefaultColormap(display, DefaultScreen(display));
-    XColor colour;
-#endif
 
     /**************************************************************************
      * Make sure white is allocated as index 0 because idx 0 is the default   *
@@ -165,16 +150,6 @@ void make_colour_map(gdImagePtr im, int style)
         }
     }
 
-#if DO_XCMAPS_TOO
-    for (i = 0; i <= LIM; i++) {
-        colour.red = _map[i].r<<8;
-        colour.green = _map[i].g<<8;
-        colour.blue = _map[i].b<<8;
-        XAllocColor(display, cmap, &colour);
-        _map[i].xcolour = colour.pixel;
-    }
-#endif
-
     grey = gdImageColorAllocate(im, 192, 192, 192);
     black = gdImageColorAllocate(im, 0, 0, 0);
 
@@ -232,14 +207,6 @@ void ShowColourMapV(gdImagePtr im, int h, int v)
 
     v += LIM;
     for (i = 0; i <= LIM; i++) {
-#if DO_XCMAPS_TOO
-        XSetForeground(display, gc, _map[i].col);
-        XDrawLine(display, window, gc, h, v-i, h+10, v-i);
-#else
         gdImageLine(im, h, v-i, h+10, v-i, _map[i].col);
-#endif
     }
-#if DO_XCMAPS_TOO
-    XSetForeground(display, gc, Black);
-#endif
 }
