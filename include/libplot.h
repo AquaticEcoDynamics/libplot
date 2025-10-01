@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.2.0"
+#define LIB_PLOT_VERSION "1.2.1"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -71,81 +71,80 @@
 
 #else
 
-# define PLT_REAL double precision
-
   INTERFACE
      SUBROUTINE set_progname(name,len) BIND(C, name="set_progname_")
         USE ISO_C_BINDING
         CCHARACTER,INTENT(in) :: name(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE
      SUBROUTINE init_plotter_main(name,len) BIND(C, name="init_plotter_main_")
         USE ISO_C_BINDING
         CCHARACTER,INTENT(in) :: name(*)
         CINTEGER,INTENT(in)   :: len
      END SUBROUTINE
-     INTEGER FUNCTION init_plotter(maxx, maxy) BIND(C, name="init_plotter_")
+     CINTEGER FUNCTION init_plotter(maxx, maxy) BIND(C, name="init_plotter_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(inout) :: maxx, maxy
      END FUNCTION
+     CINTEGER FUNCTION init_plotter_no_gui() BIND(C, name="init_plotter_no_gui_")
+      USE ISO_C_BINDING
+     END FUNCTION init_plotter_no_gui
      SUBROUTINE set_plot_font(which, size, font, len) BIND(C, name='set_plot_font_')
         USE ISO_C_BINDING
         CINTEGER,INTENT(in)   :: which
         CINTEGER,INTENT(in)   :: size
         CCHARACTER,INTENT(in) :: font(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE set_plot_font
-     INTEGER FUNCTION create_plot(posx, posy, maxx, maxy, title, len) BIND(C, name="create_plot_")
+     CINTEGER FUNCTION create_plot(posx, posy, maxx, maxy, title, len) BIND(C, name="create_plot_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(in)   :: posx, posy, maxx, maxy
         CCHARACTER,INTENT(in) :: title(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END FUNCTION
-     SUBROUTINE set_plot_x_label(label, len) BIND(C, name="set_plot_x_label_")
+     SUBROUTINE set_plot_x_label(plot, label, len) BIND(C, name="set_plot_x_label_")
         USE ISO_C_BINDING
+        CINTEGER,INTENT(in)   :: plot
         CCHARACTER,INTENT(in) :: label(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE
-     SUBROUTINE set_plot_y_label(label, len) BIND(C, name="set_plot_y_label_")
+     SUBROUTINE set_plot_y_label(plot, label, len) BIND(C, name="set_plot_y_label_")
         USE ISO_C_BINDING
+        CINTEGER,INTENT(in)   :: plot
         CCHARACTER,INTENT(in) :: label(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE
-     SUBROUTINE set_plot_z_label(label, len) BIND(C, name="set_plot_z_label_")
+     SUBROUTINE set_plot_z_label(plot, label, len) BIND(C, name="set_plot_z_label_")
         USE ISO_C_BINDING
+        CINTEGER,INTENT(in)   :: plot
         CCHARACTER,INTENT(in) :: label(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE
      SUBROUTINE set_plot_x_limits(plot, min, max) BIND(C, name="set_plot_x_limits_")
         USE ISO_C_BINDING
-        CINTEGER,INTENT(in) :: plot
-        PLT_REAL,INTENT(in) :: min, max
+        CINTEGER,INTENT(in)  :: plot
+        CAED_REAL,INTENT(in) :: min, max
      END SUBROUTINE
      SUBROUTINE set_plot_y_limits(plot, min, max) BIND(C, name="set_plot_y_limits_")
         USE ISO_C_BINDING
-        CINTEGER,INTENT(in) :: plot
-        PLT_REAL,INTENT(in) :: min, max
+        CINTEGER,INTENT(in)  :: plot
+        CAED_REAL,INTENT(in) :: min, max
      END SUBROUTINE
      SUBROUTINE set_plot_z_limits(plot, min, max) BIND(C, name="set_plot_z_limits_")
         USE ISO_C_BINDING
-        CINTEGER,INTENT(in) :: plot
-        PLT_REAL,INTENT(in) :: min, max
+        CINTEGER,INTENT(in)  :: plot
+        CAED_REAL,INTENT(in) :: min, max
      END SUBROUTINE
      SUBROUTINE set_plot_version(plot, version, len) BIND(C, name="set_plot_version_")
         USE ISO_C_BINDING
-        CINTEGER,INTENT(in) :: plot
+        CINTEGER,INTENT(in)   :: plot
         CCHARACTER,INTENT(in) :: version(*)
-        CINTEGER,INTENT(in)   :: len
+        CSIZET,INTENT(in)     :: len
      END SUBROUTINE set_plot_version
-     SUBROUTINE x_plot_value(plot, x, y, z) BIND(C, name="x_plot_value_")
-        USE ISO_C_BINDING
-        CINTEGER,INTENT(in) :: plot, x
-        PLT_REAL,INTENT(in) :: y, z
-     END SUBROUTINE
      SUBROUTINE plot_value(plot, x, y, z) BIND(C, name="plot_value_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(in) :: plot
-        PLT_REAL,INTENT(in) :: x, y, z
+        CAED_REAL,INTENT(in) :: x, y, z
      END SUBROUTINE
      SUBROUTINE flush_plot(plot) BIND(C, name="flush_plot_")
         USE ISO_C_BINDING
@@ -153,7 +152,7 @@
      END SUBROUTINE
      SUBROUTINE do_cleanup(saveall) BIND(C, name="do_cleanup_")
         USE ISO_C_BINDING
-        CLOGICAL,INTENT(in) :: saveall
+        CINTEGER,INTENT(in) :: saveall
      END SUBROUTINE
   END INTERFACE
 
