@@ -102,6 +102,10 @@
         CCHARACTER,INTENT(in) :: title(*)
         CSIZET,INTENT(in)     :: len
      END FUNCTION
+     CINTEGER FUNCTION add_plot_subplot_y(plot) BIND(C, name="add_plot_subplot_y_")
+        USE ISO_C_BINDING
+        CINTEGER,INTENT(in)   :: plot
+     END FUNCTION
      SUBROUTINE set_plot_x_label(plot, label, len) BIND(C, name="set_plot_x_label_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(in)   :: plot
@@ -141,6 +145,12 @@
         CCHARACTER,INTENT(in) :: version(*)
         CSIZET,INTENT(in)     :: len
      END SUBROUTINE set_plot_version
+     SUBROUTINE set_plot_varname(plot, varname, len) BIND(C, name="set_plot_varname_")
+        USE ISO_C_BINDING
+        CINTEGER,INTENT(in)   :: plot
+        CCHARACTER,INTENT(in) :: varname(*)
+        CSIZET,INTENT(in)     :: len
+     END SUBROUTINE
      SUBROUTINE plot_value(plot, x, y, z) BIND(C, name="plot_value_")
         USE ISO_C_BINDING
         CINTEGER,INTENT(in) :: plot
