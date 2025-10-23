@@ -126,19 +126,13 @@ static void calendar_date(int julian, int *yyyy, int *mm, int *dd);
 
 /******************************************************************************/
 #ifdef _WIN32
-char *strndup(const char *s, size_t len)
+static char *strndup(const char *s, size_t len)
 {
     size_t l = strlen(s);
     size_t min_l = (l < len)?l:len;
     char *t = malloc(min_l+1);
     if ( t != NULL ) { strncpy(t,s,min_l+1); t[min_l] = 0; }
     return t;
-}
-char *ctime_r(const time_t *timep, char *buf)
-{
-    char *s = ctime(timep);
-    strcpy(buf,s);
-    return buf;
 }
 #endif
 
@@ -192,12 +186,6 @@ int init_plotter_no_gui_() { init_plotter_no_gui(); return 0; }
 /*----------------------------------------------------------------------------*/
 void init_plotter_no_gui()
 {
-/*
-    char buf[256];
-    time_t t = time(NULL);
-    ctime_r(&t, buf);
-    printf("Started  @ %s\n", buf);
-*/
     if (progname == NULL) progname = strdup("Plot Window");
     _plots = malloc(max_plots*sizeof(Plot));
     memset(_plots, 0, max_plots*sizeof(Plot));
@@ -988,12 +976,7 @@ void do_cleanup(int saveall)
 {
     int i;
     int hit;
-/*
-    char buf[256];
-    time_t t = time(NULL);
-    ctime_r(&t, buf);
-    printf("Finished @ %s\n", buf);
-*/
+
     for (i = 0; i <= last_plot; i++) {
         if ( _plots[i].ag != NULL ) fclose(_plots[i].ag);
 

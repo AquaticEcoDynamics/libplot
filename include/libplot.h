@@ -28,7 +28,7 @@
 #ifndef _LIB_PLOT_H_
 #define _LIB_PLOT_H_
 
-#define LIB_PLOT_VERSION "1.2.1"
+#define LIB_PLOT_VERSION "1.2.2"
 
 #define PF_TITLE  1
 #define PF_LABEL  2
@@ -61,9 +61,6 @@
    void set_plot_y_step(int plot, PLT_REAL ystep);
    void set_plot_z_step(int plot, PLT_REAL zstep);
    void plot_value(int plot, double x, double y, double z);
-#ifdef _WIN32
-   char *ctime_r(const time_t *timep, char *buf);
-#endif
    void flush_plot(int plot);
    void flush_all_plots(void);
    void save_all_plots_named(const char*name);
