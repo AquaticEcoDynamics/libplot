@@ -418,9 +418,8 @@ int create_plot(int posx, int posy, int maxx, int maxy, const char *title)
 
     mx = maxx+80; my = maxy+60;
     im = gdImageCreate(mx, my);
-    (void)gdImageColorAllocate(im, 255, 255, 255);
-    gdImageColorTransparent(im, gdImageColorAllocate(im, 1, 1, 1));
     make_colour_map(im, 1); // this is an attempt at what MatLab calls "Jet"
+    gdImageColorTransparent(im, gdImageColorAllocate(im, 1, 1, 1));
 
     ShowColourMapV(im, mx-46, 5);
 
