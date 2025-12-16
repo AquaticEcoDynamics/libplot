@@ -691,16 +691,6 @@ void capitalise(char *s)
     }
 }
 
-/******************************************************************************/
-static const char** add_arg(int *argc, const char**xargv, const char *argv)
-{
-    int c = *argc;
-    c++; xargv = realloc(xargv, sizeof(char*)*c);
-    xargv[c-1] = strdup(argv);
-    *argc = c;
-    return xargv;
-}
-
 /*----------------------------------------------------------------------------*/
 int is_plots(const char *fn)
 {
@@ -723,6 +713,16 @@ int is_plots(const char *fn)
 }
 
 #if 0
+/******************************************************************************/
+static const char** add_arg(int *argc, const char**xargv, const char *argv)
+{
+    int c = *argc;
+    c++; xargv = realloc(xargv, sizeof(char*)*c);
+    xargv[c-1] = strdup(argv);
+    *argc = c;
+    return xargv;
+}
+
 #define TLOG_NAME "/tmp/STD_LOG.txt"
 /******************************************************************************/
 FILE *reopen_log(FILE *l)
@@ -770,8 +770,8 @@ FILE *reopen_log(FILE *l)
 void init_plotter_main(const char *argv0)
 {
     Controller *controller;
-    int i, xargc = 0, ret = 0;
-    int havx = 0;
+//  int i, xargc = 0, ret = 0;
+//  int havx = 0;
 
     progname = strdup(basename((char*)argv0));
     capitalise(progname);
