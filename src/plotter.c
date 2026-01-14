@@ -7,7 +7,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013-2025 - The University of Western Australia                  *
+ * Copyright 2013-2026 : The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -374,22 +374,6 @@ void set_plot_font(int which, int size, const char *font)
     }
 #endif
 }
-
-#if 0
-/******************************************************************************/
-static int gdStringWidth(const char *s, gdFontPtr f)
-{
-    return strlen(s) * (f->w);
-}
-
-/******************************************************************************/
-static int gdStringWidthFT(const char *s, const char *f, double sz)
-{
-    int brect[8];
-    gdImageStringFT(NULL, &brect[0], black, (char*)f, sz, 0.0, 0, 0, (char*)s);
-    return brect[2] - brect[0];
-}
-#endif
 
 /******************************************************************************/
 int create_plot_(int *posx, int *posy, int *maxx, int *maxy, const char *title, int *sl)

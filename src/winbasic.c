@@ -9,7 +9,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013-2025 - The University of Western Australia                  *
+ * Copyright 2013-2026 : The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -238,50 +238,11 @@ static WindowItem *_find_item(int itm_id)
     return NULL;
 }
 
-#if 0
-/******************************************************************************/
-static WindowItem *_which_item(int x, int y)
-{
-    WindowItem *item = NULL;
-    WindowPtr  wptr = _find_window(_window);
-
-    if ( wptr == NULL ) return NULL;
-    item = wptr->itm_lst;
-
-    while ( item != NULL ) {
-        if ( ( x >= item->left && x <= item->right ) &&
-             ( y >= item->top  && y <= item->bottom ) )
-            return item;
-        item = item->next;
-    }
-    return NULL;
-}
-
-/******************************************************************************/
-static WindowItem *_find_item_of_type(Window win, int type)
-{
-    WindowItem *item = NULL;
-    WindowPtr  wptr = _find_window(win);
-
-    if ( wptr == NULL ) return NULL;
-    item = wptr->itm_lst;
-
-    while ( item != NULL ) {
-        if ( item->type == type )
-            return item;
-        item = item->next;
-    }
-
-    return NULL;
-}
-#endif
-
 /******************************************************************************
  *                                                                            *
  ******************************************************************************/
 int InitUI(int *width, int *height) {
     HINSTANCE hInstance = NULL;
-#if 1
     dwidth  = GetSystemMetrics(SM_CXSCREEN);
     dheight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -301,7 +262,6 @@ int InitUI(int *width, int *height) {
                                                            PLOT_CLASS, MB_OK);
         return -1;
     }
-#endif
 
     /* adjust height/width so window will fit on the display */
     if ( dheight - 40 < *height ) *height = dheight - 40;
@@ -806,54 +766,16 @@ static int Alert(const char *message, const char *but1, const char*but2)
     params.lpszText = (LPCTSTR)convstr(message);
     params.lpszCaption = (LPCTSTR)convstr("");
 
-#if 0
-         MB_ABORTRETRYIGNORE    The message box contains three push buttons:
-                                     Abort, Retry, and Ignore.
-         MB_CANCELTRYCONTINUE   The message box contains three push buttons:
-                                     Cancel, Try Again, Continue.
-                                  Use this message box type instead of MB_ABORTRETRYIGNORE.
-         MB_HELP                Adds a Help button to the message box.
-                                When the user clicks the Help button or presses F1,
-                                 the system sends a WM_HELP message to the owner.
-         MB_OK                  The message box contains one push button:
-                                  OK. This is the default.
-         MB_OKCANCEL            The message box contains two push buttons:
-                                  OK and Cancel.
-         MB_RETRYCANCEL         The message box contains two push buttons:
-                                  Retry and Cancel.
-         MB_YESNO               The message box contains two push buttons:
-                                  Yes and No.
-         MB_YESNOCANCEL         The message box contains three push buttons:
-                                  Yes, No, and Cancel.
-#endif
-
     if (but2 != NULL) params.dwStyle = MB_ICONQUESTION    | MB_OKCANCEL;
     else              params.dwStyle = MB_ICONEXCLAMATION | MB_OK;
 
-//  params.dwLanguageId = MAKELANGID(LANG_NEUTRAL,SUBLANG_NEUTRAL);
-//  params.lpszIcon = MAKEINTRESOURCE(IDI_ICON1);
-
     switch ( MessageBoxIndirect(&params) ) {
-//      case IDABORT:     //  3 The Abort button was selected.
-//          break;
         case IDCANCEL:    //  2 The Cancel button was selected.
             ret = 0;
             break;
-//      case IDCONTINUE:  //  11 The Continue button was selected.
-//          break;
-//      case IDIGNORE:    //  5 The Ignore button was selected.
-//          break;
-//      case IDNO:        //  7 The No button was selected.
-//          break;
         case IDOK:        //  1 The OK button was selected.
             ret = 1;
             break;
-//      case IDRETRY:     //  4 The Retry button was selected.
-//          break;
-//      case IDTRYAGAIN:  //  10 The Try Again button was selected.
-//          break;
-//      case IDYES:       //  6 The Yes button was selected.
-//          break;
     }
 
     free((void*)params.lpszText);
@@ -1046,164 +968,9 @@ void capitalise(char *s)
 
 int _main_(int argc, const char *argv[]);
 
-#if 0
-static char TLOG_NAME[1024];
-
-/******************************************************************************/
-FILE *reopen_log(FILE *l)
-{
-    char nbuf[128];
-    char *tbuf = NULL;
-    HANDLE hFile = NULL;
-    struct stat buf;
-
-    snprintf(nbuf, 120, "%s-Log.txt", progname);
-
-    if (l != NULL) {
-        fclose(l);
-        if ((l = fopen(TLOG_NAME, "r")) != NULL) {
-            fstat(_fileno(l), &buf);
-            tbuf = malloc(buf.st_size + 10);
-            fread(tbuf, 1, buf.st_size, l);
-            fclose(l);
-        }
-        remove(TLOG_NAME);
-    }
-
-    if ((l = fopen(nbuf, "w")) != NULL) {
-        setvbuf(l, NULL, _IONBF, 0);
-
-        if (tbuf != NULL) {
-            fwrite(tbuf, 1, buf.st_size, l);
-            free(tbuf);
-        }
-    }
-
-// on non-console applications stdout and stderr have fileno == -2
-// however the only way that turns up is if it is built as a console app
-// so not much point looking for that case
-//  if ( _fileno(stdout) < -1 ) {
-        if (freopen(TLOG_NAME, "w", stdout) != NULL) {
-            _dup2(_fileno(l), _fileno(stdout));
-            setvbuf(stdout, NULL, _IONBF, 0);
-        }
-//  }
-
-//  if ( _fileno(stderr) < -1 ) {
-        if (freopen(TLOG_NAME, "w", stderr) != NULL) {
-            _dup2(_fileno(l), _fileno(stderr));
-            setvbuf(stderr, NULL, _IONBF, 0);
-        }
-//  }
-
-    remove(TLOG_NAME);
-
-    return l;
-}
-#endif
-
 /******************************************************************************/
 void init_plotter_main(const char *argv0)
 {
     progname = strdup(basename((char*)argv0));
     capitalise(progname);
 }
-
-
-#if 0
-/******************************************************************************/
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
-{
-    UNREFERENCED_PARAMETER(hPrevInstance);
-//  UNREFERENCED_PARAMETER(lpCmdLine);
-    UNREFERENCED_PARAMETER(nCmdShow);
-
-    char **argv = NULL;
-    int argc = 0, ret = 0;
-//  GetTempPathA(1024, TLOG_NAME);
-//  strncat(TLOG_NAME, "STD_OUT.txt", 1024-strlen(TLOG_NAME));
-
-    int i;
-//  FILE *l = fopen(TLOG_NAME, "w");
-//  setvbuf(l, NULL, _IONBF, 0);
-
-    argv = break_command_line(&argc, lpCmdLine);
-//  for (i = 0; i < argc; i++)
-//      fprintf(l, "ARG[%d] = \"%s\"\n", i, argv[i]);
-
-    // TODO: Place code here.
-
-    // extract and capitalise the program name
-    progname = _strdup(basename((char*)argv[0]));
-    capitalise(progname);
-
-//  l = reopen_log(l);
-
-#if 0
-    dwidth  = GetSystemMetrics(SM_CXSCREEN);
-    dheight = GetSystemMetrics(SM_CYSCREEN);
-
-    WndClass.cbClsExtra = 0;
-    WndClass.cbWndExtra = 0;
-    WndClass.hbrBackground = (HBRUSH)GetStockObject (WHITE_BRUSH);
-    WndClass.hCursor = LoadCursor (NULL, IDC_ARROW);
-    WndClass.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-    WndClass.hInstance = hInstance;
-    WndClass.lpfnWndProc = (WNDPROC) WndProc;
-    WndClass.lpszClassName = PLOT_CLASS;
-    WndClass.lpszMenuName = NULL;
-    WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-
-    if (!RegisterClass(&WndClass)){
-        MessageBox(NULL, (LPCTSTR)"Registration of WinClass Failed!",
-                                                           PLOT_CLASS, MB_OK);
-        return -1;
-    }
-#endif
-
-#if 0
-    // Perform application initialization:
-    if (!InitInstance(hInstance, nCmdShow)) {
-        return FALSE;
-    }
-
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
-
-    MSG msg;
-
-    // Main message loop:
-    while (GetMessage(&msg, nullptr, 0, 0)) {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-    return (int)msg.wParam;
-#endif
-
-#if 0
-    ret = _main_(argc, (const char **)argv);
-#else
-    ret = main(argc, (const char **)argv);
-#endif
-
-    for (i = 0; i < argc; i++) free((void*)(argv[i]));
-    free(progname);
-
-    return ret;
-}
-#endif
-
-#if 0
-int main(int argc, const char *argv[])
-{
-    // extract and capitalise the program name
-    progname = _strdup(basename((char*)argv[0]));
-    capitalise(progname);
-
-    return _main_(argc, argv);
-}
-#endif

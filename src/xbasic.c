@@ -9,7 +9,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013-2025 - The University of Western Australia                  *
+ * Copyright 2013-2026 : The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -30,7 +30,7 @@
  *                                                                            *
  *  Derived with permission from                                              *
  *                                                                            *
- * Copyright 2003 - Ambinet Systems                                           *
+ * Copyright 2003 : Ambinet Systems                                           *
  *                                                                            *
  ******************************************************************************/
 
@@ -1963,62 +1963,6 @@ void capitalise(char *s)
 }
 
 /******************************************************************************/
-#if 0
-static const char** add_arg(int *argc, const char**xargv, const char *argv)
-{
-    int c = *argc;
-    c++; xargv = realloc(xargv, sizeof(char*)*c);
-    xargv[c-1] = strdup(argv);
-    *argc = c;
-    return xargv;
-}
-#endif
-
-#if 0
-#define TLOG_NAME "/tmp/STD_LOG.txt"
-/******************************************************************************/
-FILE *reopen_log(FILE *l)
-{
-    char nbuf[128];
-    char *tbuf = NULL;
-    struct stat buf;
-
-    snprintf(nbuf, 120, "%s-Log.txt", progname);
-
-    if ( l != NULL ) {
-        fclose(l);
-        if ( (l = fopen(TLOG_NAME, "r")) != NULL ) {
-            fstat(fileno(l), &buf);
-            tbuf = malloc(buf.st_size+10);
-            buf.st_size = fread(tbuf, 1, buf.st_size, l);
-            fclose(l);
-        }
-        remove(TLOG_NAME);
-    }
-
-    if ( (l = fopen(nbuf, "w")) != NULL ) {
-        setvbuf(l, NULL, _IONBF, 0);
-
-        if ( tbuf != NULL ) {
-            fwrite(tbuf, 1, buf.st_size, l);
-            free(tbuf);
-        }
-    }
-
-    if ( !isatty(fileno(stderr)) ) {
-        dup2(fileno(l), fileno(stderr));
-        setvbuf(stderr, NULL, _IONBF, 0);
-    }
-    if ( !isatty(fileno(stdout)) ) {
-        dup2(fileno(l), fileno(stdout));
-        setvbuf(stdout, NULL, _IONBF, 0);
-    }
-
-    return l;
-}
-#endif
-
-/******************************************************************************/
 void init_plotter_main(const char *argv0)
 {
     progname = strdup(basename((char*)argv0));
@@ -2027,57 +1971,3 @@ void init_plotter_main(const char *argv0)
     display = NULL;
     _init_X();
 }
-
-#if 0
-/******************************************************************************/
-int main(int argc, const char *argv[])
-{
-    int i, xargc = 0, ret = 0;
-    const char **xargv = NULL;
-    char *cwd = NULL, *d = NULL, *f;
-//  FILE *l = fopen(TLOG_NAME, "w");
-//  setvbuf(l, NULL, _IONBF, 0);
-
-//  for (i = 0; i < argc; i++)
-//      fprintf(l, "CMD[%d] = \"%s\"\n", i, argv[i]);
-
-    // extract and capitalise the program name
-    progname = strdup(basename((char*)argv[0]));
-    capitalise(progname);
-
-    xargv = add_arg(&xargc, xargv, progname);
-    for (i = 1; i < argc; i++) {
-        char *arg = (char*)argv[i];
-        if ( arg[0] != '-' ) {
-            f = basename(arg);
-            cwd = dirname(arg);
-            if ( d == NULL ) {
-                if ( chdir(cwd) != 0 ) { }
-                d = cwd;
-            }
-            xargv = add_arg(&xargc, xargv, f);
-        } else {
-            xargv = add_arg(&xargc, xargv, arg);
-        }
-    }
-
-//  l = reopen_log(l);
-
-//  for (i = 0; i < xargc; i++)
-//      fprintf(l, "xarg[%d] = \"%s\"\n", i, xargv[i]);
-
-    display = NULL;
-    _init_X();
-
-    ret = _main_(xargc, xargv);
-
-    /* This is not really needed since we are about to exit which will *
-     * clean up memory anyway, but it is better if we're debugging     *
-     * memory leaks                                                    */
-    for (i = 0; i < xargc; i++) free((void*)(xargv[i]));
-    free(xargv);
-    if (progname != NULL) free(progname);
-
-    return ret;
-}
-#endif

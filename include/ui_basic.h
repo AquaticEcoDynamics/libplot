@@ -11,7 +11,7 @@
  *     School of Agriculture and Environment                                  *
  *     The University of Western Australia                                    *
  *                                                                            *
- * Copyright 2013-2025 - The University of Western Australia                  *
+ * Copyright 2013-2026 : The University of Western Australia                  *
  *                                                                            *
  *  This file is part of libplot - the plotting library used in GLM           *
  *                                                                            *
@@ -32,7 +32,7 @@
  *                                                                            *
  *  Derived with permission from                                              *
  *                                                                            *
- * Copyright 2003 - Ambinet System                                            *
+ * Copyright 2003 : Ambinet System                                            *
  *                                                                            *
  ******************************************************************************/
 #ifndef _UI_BASIC_H_
