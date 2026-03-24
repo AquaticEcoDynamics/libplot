@@ -241,7 +241,8 @@ static WindowItem *_find_item(int itm_id)
 /******************************************************************************
  *                                                                            *
  ******************************************************************************/
-int InitUI(int *width, int *height) {
+int InitUI(int *width, int *height)
+{
     HINSTANCE hInstance = NULL;
     dwidth  = GetSystemMetrics(SM_CXSCREEN);
     dheight = GetSystemMetrics(SM_CYSCREEN);
@@ -257,7 +258,7 @@ int InitUI(int *width, int *height) {
     WndClass.lpszMenuName = NULL;
     WndClass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 
-    if (!RegisterClass(&WndClass)){
+    if (!RegisterClass(&WndClass)) {
         MessageBox(NULL, (LPCTSTR)"Registration of WinClass Failed!",
                                                            PLOT_CLASS, MB_OK);
         return -1;

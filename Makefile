@@ -89,8 +89,13 @@ else ifneq ($(OSTYPE),Msys)
   INCLUDES+=-I/usr/local/include
   LIBS+=-lX11
 else
-  INCLUDES+=-I../ancillary/windows/include -I../win
-  LIBS+=-L../ancillary/windows/include -I../win
+  ifeq ("$(wildcard '../ancillary/windows')", "")
+    INCLUDES+=-I../ancillary/include
+    LIBS+=-L../ancillary/lib
+  else
+    INCLUDES+=-I../ancillary/windows/include
+    LIBS+=-L../ancillary/windows/lib
+  endif
 endif
 
 # if we are building static lib...
