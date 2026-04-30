@@ -695,6 +695,7 @@ void init_plotter_main(const char *argv0)
 //  int i, xargc = 0, ret = 0;
 //  int havx = 0;
 
+    // extract and capitalise the program name
     progname = strdup(basename((char*)argv0));
     capitalise(progname);
 
@@ -719,5 +720,4 @@ void init_plotter_main(const char *argv0)
     while ([controller runUIEvents:[NSDate dateWithTimeIntervalSinceNow:0.0]]) ;
 
     /*------------------------------------------------------------------------*/
-    // extract and capitalise the program name
 }

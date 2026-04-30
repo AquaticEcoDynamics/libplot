@@ -40,9 +40,9 @@ endif
 
 srcdir=src
 incdir=include
-INCLUDES=-I${incdir} -I.
-LIBS=-lgd -lpng -ljpeg -lm
-CFLAGS=-O3
+INCLUDES+=-I${incdir} -I.
+LIBS+=-lgd -lpng -ljpeg -lm
+CFLAGS+=-O3
 
 ifeq ($(WITH_XPLOTS),)
   WITH_XPLOTS=true
