@@ -98,8 +98,6 @@ else
   endif
 endif
 
-# if we are building static lib...
-#CFLAGS+=-fPIE
 CFLAGS+=-fPIC
 
 all: ${TARGET}
